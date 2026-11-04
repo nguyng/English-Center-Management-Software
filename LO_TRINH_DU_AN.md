@@ -115,12 +115,10 @@ Dự án nhằm xây dựng một **Web App (Tool)** quản lý tinh gọn, tậ
      *(Chỉ những học sinh `DangHoc` mới hiển thị trên bảng điểm danh hàng ngày).*
    - Bảng `BuoiHoc` (`id`, `trung_tam_id`, Mã buổi, ngày học, ca học, `co_kiem_tra: boolean`, `gio_ket_thuc`, `da_gui: boolean`, `trang_thai_diem_danh: 'chua_diem_danh' | 'da_diem_danh'`, `trang_thai_buoi_hoc: 'BinhThuong' | 'NghiLe' | 'DaHuy'`).
    - Bảng `DiemDanh` (`id`, Học sinh, Buổi học, `trang_thai: CoMat | Vang`).
-   - Bảng `BaiKiemTra` & `KetQua`:
-     - Thêm cột `hinh_thuc: 'he_thong' | 'giay'` để phân biệt bài thi trên web hay thi giấy.
-     - Thêm cột `ngay_kiem_tra: date` — mặc định tự điền bằng ngày tạo bài, giáo viên có thể sửa lại trước khi xác nhận.
-     - Điểm số `diem_so: float` **bắt buộc luôn làm tròn 1 chữ số thập phân** (ví dụ: `8.3`, không để `8.333333`).
-     - Nếu `hinh_thuc = 'he_thong'`: Điểm được tính tự động từ đáp án của học sinh.
-     - Nếu `hinh_thuc = 'giay'`: Giáo viên nhập điểm tay vào cột `diem_thu_cong`.
+   - Bảng `BaiKiemTra` (`id`, `trung_tam_id`, `buoi_hoc_id`, `ten_bai_kiem_tra`, `hinh_thuc: 'he_thong' | 'giay'`, `ngay_kiem_tra: date`, `thoi_gian_phut`).
+   - Bảng `CauHoi` (Dành cho thi online: `id`, `bai_kiem_tra_id`, `noi_dung`, `dap_an_a`, `dap_an_b`, `dap_an_c`, `dap_an_d`, `dap_an_dung`).
+   - Bảng `KetQua` (`id`, `bai_kiem_tra_id`, `hoc_sinh_id`, `diem_so: float`, `diem_thu_cong: float`, `thoi_gian_nop: datetime`).  
+     *(Điểm số bắt buộc luôn làm tròn 1 chữ số thập phân, ví dụ: `8.5`, không để `8.3333333`).*
    - Bảng `NhatKyZalo` (`id`, `trung_tam_id`, `hoc_sinh_id`, `buoi_hoc_id`, `loai_tin: 'bao_vang' | 'bao_diem'`, Ngày giờ, SĐT nhận, Nội dung, Trạng thái: Thành công / Thất bại / Hết tiền, Trạng thái Demo/Thật).
 2. **Thiết kế Giao diện (UI Mockup):**
 
