@@ -125,6 +125,7 @@ erDiagram
         int lop_id FK
         date ngay_hoc
         string ca_hoc
+        time gio_bat_dau
         time gio_ket_thuc
         boolean co_kiem_tra
         boolean da_gui
@@ -313,3 +314,4 @@ flowchart TD
 ---
 
 > 💡 **Hướng dẫn xem sơ đồ:** Tài liệu này dùng cú pháp chuẩn **Mermaid**. Khi mở trên GitHub hoặc VS Code / Markdown Preview, các khối mã trên sẽ tự động vẽ thành các sơ đồ đồ họa trực quan và tương tác được.
+

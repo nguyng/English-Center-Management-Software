@@ -113,7 +113,8 @@ Dự án nhằm xây dựng một **Web App (Tool)** quản lý tinh gọn, tậ
    - Bảng `LopHoc` (`id`, `trung_tam_id`, Mã lớp, tên lớp, giáo viên phụ trách).
    - Bảng `HocSinh` (`id`, `trung_tam_id`, Họ tên, SĐT phụ huynh, lớp, `ngay_nhap_hoc: date`, `trang_thai: 'DangHoc' | 'BaoLuu' | 'DaNghi'`).  
      *(Chỉ những học sinh `DangHoc` mới hiển thị trên bảng điểm danh hàng ngày).*
-   - Bảng `BuoiHoc` (`id`, `trung_tam_id`, Mã buổi, ngày học, ca học, `co_kiem_tra: boolean`, `gio_ket_thuc`, `da_gui: boolean`, `trang_thai_diem_danh: 'chua_diem_danh' | 'da_diem_danh'`, `trang_thai_buoi_hoc: 'BinhThuong' | 'NghiLe' | 'DaHuy'`).
+   - Bảng `BuoiHoc` (`id`, `trung_tam_id`, Mã buổi, ngày học, ca học, `gio_bat_dau: time`, `gio_ket_thuc: time`, `co_kiem_tra: boolean`, `da_gui: boolean`, `trang_thai_diem_danh: 'chua_diem_danh' | 'da_diem_danh'`, `trang_thai_buoi_hoc: 'BinhThuong' | 'NghiLe' | 'DaHuy'`).  
+     *(Ví dụ: `gio_bat_dau: 17:30`, `gio_ket_thuc: 19:00` — Dùng để hiển thị lịch dạy, chèn giờ vào tin nhắn Zalo và kiểm soát cảnh báo giáo viên vào lớp muộn).*
    - Bảng `DiemDanh` (`id`, Học sinh, Buổi học, `trang_thai: CoMat | Vang`).
    - Bảng `BaiKiemTra` (`id`, `trung_tam_id`, `buoi_hoc_id`, `ten_bai_kiem_tra`, `hinh_thuc: 'he_thong' | 'giay'`, `ngay_kiem_tra: date`, `thoi_gian_phut`).
    - Bảng `CauHoi` (Dành cho thi online: `id`, `bai_kiem_tra_id`, `noi_dung`, `dap_an_a`, `dap_an_b`, `dap_an_c`, `dap_an_d`, `dap_an_dung`).
