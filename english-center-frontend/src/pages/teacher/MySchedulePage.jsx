@@ -7,9 +7,9 @@ import StatusBadge from '../../components/StatusBadge';
 const { Title } = Typography;
 
 const mockSchedule = [
-  { id: 101, lop: 'Lớp A1 - Starter', ngay_hoc: '2026-11-05', ca_hoc: '17:30 - 19:00', trang_thai_buoi_hoc: 'BinhThuong', trang_thai_diem_danh: 'chua_diem_danh' },
-  { id: 102, lop: 'Lớp A1 - Starter', ngay_hoc: '2026-11-07', ca_hoc: '17:30 - 19:00', trang_thai_buoi_hoc: 'BinhThuong', trang_thai_diem_danh: 'chua_diem_danh' },
-  { id: 103, lop: 'Lớp A1 - Starter', ngay_hoc: '2026-11-09', ca_hoc: '17:30 - 19:00', trang_thai_buoi_hoc: 'NghiLe', trang_thai_diem_danh: 'chua_diem_danh' },
+  { id: 101, lop: 'Lớp A1 - Starter', ngay_hoc: '2026-11-05', gio_bat_dau: '17:30', gio_ket_thuc: '19:00', ca_hoc: '17:30 - 19:00', trang_thai_buoi_hoc: 'BinhThuong', trang_thai_diem_danh: 'chua_diem_danh' },
+  { id: 102, lop: 'Lớp A1 - Starter', ngay_hoc: '2026-11-07', gio_bat_dau: '17:30', gio_ket_thuc: '19:00', ca_hoc: '17:30 - 19:00', trang_thai_buoi_hoc: 'BinhThuong', trang_thai_diem_danh: 'chua_diem_danh' },
+  { id: 103, lop: 'Lớp A1 - Starter', ngay_hoc: '2026-11-09', gio_bat_dau: '17:30', gio_ket_thuc: '19:00', ca_hoc: '17:30 - 19:00', trang_thai_buoi_hoc: 'NghiLe', trang_thai_diem_danh: 'chua_diem_danh' },
 ];
 
 export default function MySchedulePage() {

@@ -7,10 +7,10 @@ import { formatDate } from '../../utils/formatters';
 const { Title, Text } = Typography;
 
 const initialSessions = [
-  { id: 1, lop: 'Lớp A1 - Starter', ngay_hoc: '2026-11-05', ca_hoc: '17:30 - 19:00', giao_vien: 'Nguyễn Văn A', trang_thai_buoi_hoc: 'BinhThuong', trang_thai_diem_danh: 'da_diem_danh' },
-  { id: 2, lop: 'Lớp B2 - Intermediate', ngay_hoc: '2026-11-05', ca_hoc: '19:00 - 20:30', giao_vien: 'Trần Thị B', trang_thai_buoi_hoc: 'BinhThuong', trang_thai_diem_danh: 'chua_diem_danh' },
-  { id: 3, lop: 'Lớp A1 - Starter', ngay_hoc: '2026-11-06', ca_hoc: '17:30 - 19:00', giao_vien: 'Nguyễn Văn A', trang_thai_buoi_hoc: 'NghiLe', trang_thai_diem_danh: 'chua_diem_danh' },
-  { id: 4, lop: 'Lớp C1 - Advanced', ngay_hoc: '2026-11-06', ca_hoc: '19:00 - 20:30', giao_vien: 'Lê Hoàng C', trang_thai_buoi_hoc: 'BinhThuong', trang_thai_diem_danh: 'chua_diem_danh' },
+  { id: 1, lop: 'Lớp A1 - Starter', ngay_hoc: '2026-11-05', gio_bat_dau: '17:30', gio_ket_thuc: '19:00', ca_hoc: '17:30 - 19:00', giao_vien: 'Nguyễn Văn A', trang_thai_buoi_hoc: 'BinhThuong', trang_thai_diem_danh: 'da_diem_danh' },
+  { id: 2, lop: 'Lớp B2 - Intermediate', ngay_hoc: '2026-11-05', gio_bat_dau: '19:00', gio_ket_thuc: '20:30', ca_hoc: '19:00 - 20:30', giao_vien: 'Trần Thị B', trang_thai_buoi_hoc: 'BinhThuong', trang_thai_diem_danh: 'chua_diem_danh' },
+  { id: 3, lop: 'Lớp A1 - Starter', ngay_hoc: '2026-11-06', gio_bat_dau: '17:30', gio_ket_thuc: '19:00', ca_hoc: '17:30 - 19:00', giao_vien: 'Nguyễn Văn A', trang_thai_buoi_hoc: 'NghiLe', trang_thai_diem_danh: 'chua_diem_danh' },
+  { id: 4, lop: 'Lớp C1 - Advanced', ngay_hoc: '2026-11-06', gio_bat_dau: '19:00', gio_ket_thuc: '20:30', ca_hoc: '19:00 - 20:30', giao_vien: 'Lê Hoàng C', trang_thai_buoi_hoc: 'BinhThuong', trang_thai_diem_danh: 'chua_diem_danh' },
 ];
 
 export default function SchedulePage() {

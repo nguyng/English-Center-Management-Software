@@ -1,6 +1,19 @@
 import dayjs from 'dayjs';
 
 /**
+ * Format ca học từ gio_bat_dau và gio_ket_thuc (hoặc fallback ca_hoc)
+ */
+export function formatShift(sessionOrStart, end) {
+  if (typeof sessionOrStart === 'object' && sessionOrStart !== null) {
+    const { gio_bat_dau, gio_ket_thuc, ca_hoc } = sessionOrStart;
+    if (gio_bat_dau && gio_ket_thuc) return `${gio_bat_dau} - ${gio_ket_thuc}`;
+    return ca_hoc || '';
+  }
+  if (sessionOrStart && end) return `${sessionOrStart} - ${end}`;
+  return sessionOrStart || '';
+}
+
+/**
  * Format ngày theo dd/mm/yyyy
  */
 export function formatDate(date) {

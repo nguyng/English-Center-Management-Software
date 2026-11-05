@@ -6,7 +6,7 @@ import { formatDate } from '../../utils/formatters';
 const { Title, Text } = Typography;
 
 const mockAlerts = [
-  { id: 2, lop: 'Lớp B2 - Intermediate', giao_vien: 'Trần Thị B', ca_hoc: '19:00 - 20:30', ngay_hoc: '2026-11-05', gio_ket_thuc: '20:30' },
+  { id: 2, lop: 'Lớp B2 - Intermediate', giao_vien: 'Trần Thị B', gio_bat_dau: '19:00', gio_ket_thuc: '20:30', ca_hoc: '19:00 - 20:30', ngay_hoc: '2026-11-05' },
 ];
 
 export default function AttendanceAlertPage() {

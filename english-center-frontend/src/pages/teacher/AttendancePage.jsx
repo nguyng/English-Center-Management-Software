@@ -36,6 +36,8 @@ const mockSessionInfo = {
   id: 1,
   lop: 'Lớp A1 - Starter',
   ma_lop: 'A1-2026',
+  gio_bat_dau: '17:30',
+  gio_ket_thuc: '19:00',
   ca_hoc: '17:30 - 19:00',
   ngay_hoc: '2026-11-05',
   giao_vien: 'Nguyễn Văn A',
