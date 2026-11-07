@@ -26,6 +26,7 @@ import {
   CopyOutlined,
   EyeOutlined,
   PlusOutlined,
+  TrophyOutlined,
 } from '@ant-design/icons';
 import ScoreInput from '../../components/ScoreInput';
 import ConfirmModal from '../../components/ConfirmModal';
@@ -462,33 +463,46 @@ export default function AttendancePage() {
 
               {examType === EXAM_TYPE.HE_THONG && (
                 <div style={{ background: '#f6ffed', border: '1px solid #b7eb8f', borderRadius: 8, padding: 16 }}>
-                  <Text strong style={{ fontSize: 15, color: '#389e0d' }}>
-                    💻 Đã chuẩn bị đề thi online: "Từ vựng & Ngữ pháp Unit 3 (15 phút)"
-                  </Text>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+                    <Text strong style={{ fontSize: 15, color: '#389e0d' }}>
+                      💻 Đề thi online: "Từ vựng & Ngữ pháp Unit 3"
+                    </Text>
+                    <div>
+                      <Tag color="magenta" style={{ fontWeight: 'bold' }}>Mã PIN vào thi: 1234</Tag>
+                      <Tag color="cyan">Khung giờ: 08:00 - 22:00</Tag>
+                    </div>
+                  </div>
                   <Paragraph style={{ margin: '8px 0', color: '#555' }}>
-                    Giáo viên chỉ cần sao chép đường link bên dưới và gửi vào nhóm Zalo lớp để học sinh bấm vào làm bài:
+                    Giáo viên sao chép link và mã PIN gửi vào nhóm Zalo lớp để học sinh làm bài:
                   </Paragraph>
                   <Space style={{ width: '100%' }} wrap>
                     <Input
                       value={`${window.location.origin}/thi/101`}
                       readOnly
-                      style={{ width: 340, background: '#fff' }}
+                      style={{ width: 320, background: '#fff' }}
                     />
                     <Button
                       type="primary"
                       icon={<CopyOutlined />}
                       onClick={() => {
-                        navigator.clipboard.writeText(`${window.location.origin}/thi/101`);
-                        message.success('📋 Đã sao chép link bài thi! Hãy dán vào nhóm Zalo lớp.');
+                        const copyText = `Link làm bài kiểm tra: ${window.location.origin}/thi/101\nMã bảo mật vào thi (PIN): 1234\nKhung giờ mở đề: 08:00 - 22:00`;
+                        navigator.clipboard.writeText(copyText);
+                        message.success('📋 Đã sao chép link & mã PIN bài thi! Hãy dán vào nhóm Zalo lớp.');
                       }}
                     >
-                      Sao chép Link gửi Zalo
+                      Sao chép Link & Mã
                     </Button>
                     <Button
                       icon={<EyeOutlined />}
-                      onClick={() => window.open(`${window.location.origin}/thi/101`, '_blank')}
+                      onClick={() => window.open(`${window.location.origin}/thi/101?preview=true`, '_blank')}
                     >
-                      Mở thử bài thi
+                      Mở xem thử (GV)
+                    </Button>
+                    <Button
+                      icon={<TrophyOutlined />}
+                      onClick={() => navigate('/exam/results/101')}
+                    >
+                      Xem bảng điểm học sinh
                     </Button>
                     <Button
                       icon={<PlusOutlined />}
@@ -498,7 +512,7 @@ export default function AttendancePage() {
                     </Button>
                   </Space>
                   <div style={{ marginTop: 8, fontSize: 13, color: '#888' }}>
-                    💡 Học sinh làm bài xong hệ thống sẽ tự động chấm điểm. Đến cuối ca học, hệ thống sẽ tự động gửi điểm cho phụ huynh qua Zalo.
+                    💡 Học sinh làm bài xong hệ thống sẽ tự động chấm điểm. Giáo viên có thể bấm "Xem bảng điểm học sinh" để theo dõi kết quả từng câu của cả lớp.
                   </div>
                 </div>
               )}

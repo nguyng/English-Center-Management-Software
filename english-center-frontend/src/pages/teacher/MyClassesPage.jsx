@@ -1,10 +1,9 @@
 import { useNavigate } from 'react-router-dom';
 import { Card, Row, Col, Typography, Tag, Button, Space, Empty } from 'antd';
-import { TeamOutlined, CalendarOutlined, EditOutlined } from '@ant-design/icons';
+import { TeamOutlined, CalendarOutlined, EditOutlined, TrophyOutlined } from '@ant-design/icons';
 
 const { Title, Text } = Typography;
 
-// Mock data — sẽ thay bằng API
 const mockMyClasses = [
   {
     id: 1,
@@ -20,7 +19,7 @@ const mockMyClasses = [
     ten_lop: 'Lớp B2 - Intermediate',
     so_hoc_sinh: 15,
     lich_hoc: 'Thứ 3, 5, 7 — Ca 19:00',
-    buoi_hoc_hom_nay: null, // Hôm nay không có
+    buoi_hoc_hom_nay: null,
   },
 ];
 
@@ -36,22 +35,28 @@ export default function MyClassesPage() {
       ) : (
         <Row gutter={[16, 16]}>
           {mockMyClasses.map((cls) => (
-            <Col xs={24} sm={12} lg={8} key={cls.id}>
+            <Col xs={24} sm={12} lg={12} key={cls.id}>
               <Card
                 hoverable
                 style={{ borderRadius: 12 }}
                 actions={[
                   cls.buoi_hoc_hom_nay ? (
                     <Button
-                      type="link"
+                      type="primary"
                       icon={<EditOutlined />}
                       onClick={() => navigate(`/attendance/${cls.buoi_hoc_hom_nay.id}`)}
                     >
-                      Điểm danh
+                      Điểm danh ca hôm nay
                     </Button>
                   ) : (
-                    <Text type="secondary">Hôm nay không có lịch</Text>
+                    <Text type="secondary">Hôm nay không có ca</Text>
                   ),
+                  <Button
+                    icon={<TrophyOutlined />}
+                    onClick={() => navigate('/exam/results/101')}
+                  >
+                    Xem bảng điểm bài thi
+                  </Button>,
                 ]}
               >
                 <Card.Meta
@@ -90,4 +95,3 @@ export default function MyClassesPage() {
     </div>
   );
 }
-

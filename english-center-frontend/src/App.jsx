@@ -24,6 +24,7 @@ import MyClassesPage from './pages/teacher/MyClassesPage';
 import AttendancePage from './pages/teacher/AttendancePage';
 import ExamCreatePage from './pages/teacher/ExamCreatePage';
 import ExamScorePage from './pages/teacher/ExamScorePage';
+import ExamResultsPage from './pages/teacher/ExamResultsPage';
 import MySchedulePage from './pages/teacher/MySchedulePage';
 // Student
 import ExamTakingPage from './pages/student/ExamTakingPage';
@@ -166,6 +167,14 @@ export default function App() {
                     element={
                       <ProtectedRoute allowedRoles={[ROLES.GIAO_VIEN, ROLES.ADMIN, ROLES.SUPER_ADMIN]}>
                         <ExamScorePage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="exam/results/:examId"
+                    element={
+                      <ProtectedRoute allowedRoles={[ROLES.GIAO_VIEN, ROLES.ADMIN, ROLES.SUPER_ADMIN]}>
+                        <ExamResultsPage />
                       </ProtectedRoute>
                     }
                   />

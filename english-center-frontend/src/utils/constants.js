@@ -93,6 +93,7 @@ export const MENU_CONFIG = {
     { key: '/my-classes', icon: 'TeamOutlined', label: 'Lớp của tôi' },
     { key: '/my-schedule', icon: 'CalendarOutlined', label: 'Lịch dạy' },
     { key: '/exam/create', icon: 'FormOutlined', label: 'Tạo bài kiểm tra' },
+    { key: '/exam/results/101', icon: 'TrophyOutlined', label: 'Bảng điểm bài thi' },
     { key: '/zalo-history', icon: 'MessageOutlined', label: 'Lịch sử Zalo' },
   ],
 };

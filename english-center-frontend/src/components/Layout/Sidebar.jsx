@@ -12,6 +12,7 @@ import {
   FileTextOutlined,
   SolutionOutlined,
   BookOutlined,
+  TrophyOutlined,
 } from '@ant-design/icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { MENU_CONFIG } from '../../utils/constants';
@@ -30,6 +31,7 @@ const iconMap = {
   FileTextOutlined: <FileTextOutlined />,
   SolutionOutlined: <SolutionOutlined />,
   BookOutlined: <BookOutlined />,
+  TrophyOutlined: <TrophyOutlined />,
 };
 
 export default function Sidebar({ collapsed, onCollapse }) {
