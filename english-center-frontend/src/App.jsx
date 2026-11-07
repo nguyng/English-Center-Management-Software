@@ -37,9 +37,46 @@ export default function App() {
       locale={viVN}
       theme={{
         token: {
-          colorPrimary: '#1890ff',
-          borderRadius: 8,
-          fontFamily: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+          colorPrimary: '#1e3a8a',
+          colorInfo: '#0284c7',
+          colorSuccess: '#10b981',
+          colorWarning: '#f59e0b',
+          colorError: '#ef4444',
+          colorTextBase: '#0f172a',
+          colorBgLayout: '#f8fafc',
+          borderRadius: 10,
+          fontFamily:
+            "'Be Vietnam Pro', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+          fontSize: 14,
+          wireframe: false,
+        },
+        components: {
+          Button: {
+            controlHeight: 38,
+            controlHeightLG: 46,
+            fontWeight: 600,
+            borderRadius: 8,
+            borderRadiusLG: 10,
+          },
+          Card: {
+            borderRadiusLG: 16,
+          },
+          Table: {
+            headerBg: '#f8fafc',
+            headerColor: '#334155',
+            rowHoverBg: '#f8fafc',
+            borderColor: '#f1f5f9',
+          },
+          Input: {
+            controlHeight: 38,
+            controlHeightLG: 44,
+            borderRadius: 8,
+          },
+          Select: {
+            controlHeight: 38,
+            controlHeightLG: 44,
+            borderRadius: 8,
+          },
         },
       }}
     >

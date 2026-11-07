@@ -1,6 +1,28 @@
 import { useState } from 'react';
-import { Table, Button, Tag, Typography, Modal, App as AntApp, Select, Space, Form, DatePicker, TimePicker, Card } from 'antd';
-import { StopOutlined, CheckCircleOutlined, UserSwitchOutlined, PlusOutlined, DeleteOutlined, CalendarOutlined } from '@ant-design/icons';
+import {
+  Table,
+  Button,
+  Tag,
+  Typography,
+  App as AntApp,
+  Select,
+  Space,
+  Form,
+  DatePicker,
+  TimePicker,
+  Modal,
+  Row,
+  Col,
+} from 'antd';
+import {
+  StopOutlined,
+  CheckCircleOutlined,
+  UserSwitchOutlined,
+  PlusOutlined,
+  DeleteOutlined,
+  CalendarOutlined,
+  ClockCircleOutlined,
+} from '@ant-design/icons';
 import StatusBadge from '../../components/StatusBadge';
 import { formatDate } from '../../utils/formatters';
 import dayjs from 'dayjs';
@@ -17,8 +39,11 @@ const initialSessions = [
 export default function SchedulePage() {
   const [sessions, setSessions] = useState(initialSessions);
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [filterClass, setFilterClass] = useState(null);
   const [form] = Form.useForm();
   const { message, modal } = AntApp.useApp();
+
+  const filteredSessions = filterClass ? sessions.filter((s) => s.lop === filterClass) : sessions;
 
   const handleCancel = (session) => {
     let cancelType = 'DaHuy';
@@ -26,13 +51,19 @@ export default function SchedulePage() {
       title: `🚫 Hủy ca học / Báo nghỉ lễ`,
       content: (
         <div style={{ marginTop: 12 }}>
-          <p>Lớp: <strong>{session.lop}</strong></p>
-          <p>Ca học: <strong>{session.ca_hoc}</strong> | Ngày: <strong>{formatDate(session.ngay_hoc)}</strong></p>
+          <p>
+            Lớp: <strong>{session.lop}</strong>
+          </p>
+          <p>
+            Ca học: <strong>{session.ca_hoc}</strong> | Ngày: <strong>{formatDate(session.ngay_hoc)}</strong>
+          </p>
           <p style={{ marginTop: 12, marginBottom: 4 }}>Chọn hình thức:</p>
           <Select
             defaultValue="DaHuy"
             style={{ width: '100%' }}
-            onChange={(val) => { cancelType = val; }}
+            onChange={(val) => {
+              cancelType = val;
+            }}
             options={[
               { value: 'DaHuy', label: '🚫 Hủy đột xuất (Bão, cúp điện, không học)' },
               { value: 'NghiLe', label: '🎊 Báo nghỉ lễ (Tết, Quốc khánh...)' },
@@ -61,13 +92,19 @@ export default function SchedulePage() {
       title: `👨‍🏫 Phân công Giáo viên dạy thay`,
       content: (
         <div style={{ marginTop: 12 }}>
-          <p>Lớp: <strong>{session.lop}</strong> | Ca: <strong>{session.ca_hoc}</strong></p>
-          <p>Giáo viên hiện tại: <strong>{session.giao_vien}</strong> (Báo bận)</p>
+          <p>
+            Lớp: <strong>{session.lop}</strong> | Ca: <strong>{session.ca_hoc}</strong>
+          </p>
+          <p>
+            Giáo viên hiện tại: <strong>{session.giao_vien}</strong> (Báo bận)
+          </p>
           <p style={{ marginTop: 12, marginBottom: 4 }}>Chọn giáo viên dạy thay:</p>
           <Select
             defaultValue="Lê Hoàng C"
             style={{ width: '100%' }}
-            onChange={(v) => { newTeacher = v; }}
+            onChange={(v) => {
+              newTeacher = v;
+            }}
             options={[
               { value: 'Nguyễn Văn A', label: 'Nguyễn Văn A' },
               { value: 'Trần Thị B', label: 'Trần Thị B' },
@@ -127,23 +164,81 @@ export default function SchedulePage() {
   };
 
   const columns = [
-    { title: 'Ngày học', dataIndex: 'ngay_hoc', key: 'ngay', render: (d) => formatDate(d), width: 120, sorter: (a, b) => new Date(a.ngay_hoc) - new Date(b.ngay_hoc), defaultSortOrder: 'descend' },
-    { title: 'Lớp học', dataIndex: 'lop', key: 'lop', width: 180 },
-    { title: 'Khung giờ', key: 'ca', width: 140, render: (_, r) => <strong>{r.ca_hoc || `${r.gio_bat_dau} - ${r.gio_ket_thuc}`}</strong> },
-    { title: 'Giáo viên phụ trách', dataIndex: 'giao_vien', key: 'gv', width: 180 },
-    { title: 'Trạng thái buổi', dataIndex: 'trang_thai_buoi_hoc', key: 'tt', width: 140, render: (s) => <StatusBadge type="session" status={s} /> },
+    {
+      title: 'Ngày học',
+      dataIndex: 'ngay_hoc',
+      key: 'ngay',
+      render: (d) => (
+        <Space size={6}>
+          <CalendarOutlined style={{ color: '#0284c7' }} />
+          <Text strong>{formatDate(d)}</Text>
+        </Space>
+      ),
+      width: 140,
+      sorter: (a, b) => new Date(a.ngay_hoc) - new Date(b.ngay_hoc),
+      defaultSortOrder: 'descend',
+    },
+    {
+      title: 'Lớp học',
+      dataIndex: 'lop',
+      key: 'lop',
+      width: 190,
+      render: (lop) => (
+        <Tag color="geekblue" style={{ borderRadius: 6, fontWeight: 600 }}>
+          {lop}
+        </Tag>
+      ),
+    },
+    {
+      title: 'Khung giờ',
+      key: 'ca',
+      width: 150,
+      render: (_, r) => (
+        <Space size={6}>
+          <ClockCircleOutlined style={{ color: '#64748b' }} />
+          <Text strong>{r.ca_hoc || `${r.gio_bat_dau} - ${r.gio_ket_thuc}`}</Text>
+        </Space>
+      ),
+    },
+    {
+      title: 'Giảng viên phụ trách',
+      dataIndex: 'giao_vien',
+      key: 'gv',
+      width: 190,
+      render: (gv) => (
+        <Text style={{ color: gv.includes('Dạy thay') ? '#0284c7' : '#0f172a', fontWeight: gv.includes('Dạy thay') ? 600 : 400 }}>
+          {gv}
+        </Text>
+      ),
+    },
+    {
+      title: 'Trạng thái buổi',
+      dataIndex: 'trang_thai_buoi_hoc',
+      key: 'tt',
+      width: 140,
+      render: (s) => <StatusBadge type="session" status={s} />,
+    },
     {
       title: 'Điểm danh',
       dataIndex: 'trang_thai_diem_danh',
       key: 'dd',
       width: 150,
       render: (s) =>
-        s === 'da_diem_danh' ? <Tag color="green"><CheckCircleOutlined /> Đã điểm danh</Tag> : <Tag color="orange">⏳ Chưa điểm danh</Tag>,
+        s === 'da_diem_danh' ? (
+          <Tag color="success" icon={<CheckCircleOutlined />}>
+            Đã điểm danh
+          </Tag>
+        ) : (
+          <Tag color="warning" icon={<ClockCircleOutlined />}>
+            Chưa điểm danh
+          </Tag>
+        ),
     },
     {
       title: 'Thao tác Admin',
       key: 'action',
       width: 260,
+      align: 'right',
       render: (_, record) => (
         <Space>
           {record.trang_thai_buoi_hoc === 'BinhThuong' ? (
@@ -156,7 +251,9 @@ export default function SchedulePage() {
               </Button>
             </>
           ) : (
-            <Text type="secondary">Đã khóa lịch</Text>
+            <Text type="secondary" style={{ fontSize: 12.5 }}>
+              Đã khóa lịch
+            </Text>
           )}
           <Button size="small" type="text" danger icon={<DeleteOutlined />} onClick={() => handleDelete(record)} />
         </Space>
@@ -166,13 +263,22 @@ export default function SchedulePage() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+      <div className="edtech-page-header">
         <div>
-          <Title level={4} style={{ margin: 0 }}>📅 Quản Lý Lịch Học & Ca Dạy</Title>
-          <Text type="secondary">Lên lịch ca học mới, phân công dạy thay, báo nghỉ lễ và hủy lịch đột xuất</Text>
+          <Space align="center" size={10}>
+            <Title level={4} style={{ margin: 0, fontWeight: 800 }}>
+              Quản Lý Lịch Học & Điều Phối Ca Dạy
+            </Title>
+            <Tag color="blue">{sessions.length} ca học</Tag>
+          </Space>
+          <Text type="secondary" style={{ display: 'block', marginTop: 4 }}>
+            Lên lịch ca học mới, phân công giảng viên dạy thay, báo nghỉ lễ và hủy lịch đột xuất an toàn.
+          </Text>
         </div>
         <Button
           type="primary"
+          className="btn-cta-orange"
+          size="large"
           icon={<PlusOutlined />}
           onClick={() => {
             form.resetFields();
@@ -183,14 +289,42 @@ export default function SchedulePage() {
         </Button>
       </div>
 
-      <Table dataSource={sessions} columns={columns} rowKey="id" pagination={{ pageSize: 10 }} />
+      <div className="edtech-table-wrapper">
+        <div className="edtech-filter-bar" style={{ border: 'none', borderBottom: '1px solid #f1f5f9' }}>
+          <Space wrap>
+            <Select
+              placeholder="Lọc theo lớp học"
+              allowClear
+              value={filterClass}
+              onChange={setFilterClass}
+              style={{ width: 220 }}
+              options={[
+                { value: 'Lớp A1 - Starter', label: 'Lớp A1 - Starter' },
+                { value: 'Lớp B2 - Intermediate', label: 'Lớp B2 - Intermediate' },
+                { value: 'Lớp C1 - Advanced', label: 'Lớp C1 - Advanced' },
+              ]}
+            />
+          </Space>
+          <Text type="secondary" style={{ fontSize: 13 }}>
+            Hiển thị <strong>{filteredSessions.length}</strong> ca học
+          </Text>
+        </div>
+
+        <Table
+          dataSource={filteredSessions}
+          columns={columns}
+          rowKey="id"
+          pagination={{ pageSize: 10 }}
+          scroll={{ x: 960 }}
+        />
+      </div>
 
       {/* Modal Tạo Lịch Ca Học Mới */}
       <Modal
         open={createModalOpen}
         onCancel={() => setCreateModalOpen(false)}
         onOk={handleCreateSession}
-        title="📅 Thêm Ca Học Mới Vào Lịch Dạy"
+        title="📅 Thêm Ca Học Mới Vào Lịch Giảng Dạy"
         okText="Tạo ca học"
         cancelText="Đóng"
         width={520}
@@ -215,7 +349,6 @@ export default function SchedulePage() {
                 { value: 'Lớp C1 - Advanced', label: 'Lớp C1 - Advanced' },
               ]}
               onChange={(val) => {
-                // Tự động gán giáo viên mặc định theo lớp
                 if (val.includes('A1')) form.setFieldValue('giao_vien', 'Nguyễn Văn A');
                 else if (val.includes('B2')) form.setFieldValue('giao_vien', 'Trần Thị B');
                 else if (val.includes('C1')) form.setFieldValue('giao_vien', 'Lê Hoàng C');
@@ -227,16 +360,24 @@ export default function SchedulePage() {
             <DatePicker format="DD/MM/YYYY" style={{ width: '100%' }} />
           </Form.Item>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-            <Form.Item name="gio_bat_dau" label="Giờ bắt đầu" rules={[{ required: true, message: 'Chọn giờ bắt đầu!' }]}>
-              <TimePicker format="HH:mm" minuteStep={5} style={{ width: '100%' }} />
-            </Form.Item>
-            <Form.Item name="gio_ket_thuc" label="Giờ kết thúc" rules={[{ required: true, message: 'Chọn giờ kết thúc!' }]}>
-              <TimePicker format="HH:mm" minuteStep={5} style={{ width: '100%' }} />
-            </Form.Item>
-          </div>
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item name="gio_bat_dau" label="Giờ bắt đầu" rules={[{ required: true, message: 'Chọn giờ bắt đầu!' }]}>
+                <TimePicker format="HH:mm" minuteStep={5} style={{ width: '100%' }} />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item name="gio_ket_thuc" label="Giờ kết thúc" rules={[{ required: true, message: 'Chọn giờ kết thúc!' }]}>
+                <TimePicker format="HH:mm" minuteStep={5} style={{ width: '100%' }} />
+              </Form.Item>
+            </Col>
+          </Row>
 
-          <Form.Item name="giao_vien" label="Giáo viên phụ trách ca" rules={[{ required: true, message: 'Vui lòng chọn giáo viên!' }]}>
+          <Form.Item
+            name="giao_vien"
+            label="Giáo viên phụ trách ca"
+            rules={[{ required: true, message: 'Vui lòng chọn giáo viên!' }]}
+          >
             <Select
               options={[
                 { value: 'Nguyễn Văn A', label: 'Nguyễn Văn A' },

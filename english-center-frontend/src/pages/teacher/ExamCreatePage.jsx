@@ -10,13 +10,24 @@ import {
   DatePicker,
   TimePicker,
   Select,
-  List,
   App as AntApp,
   Tag,
   Modal,
   Alert,
+  Row,
+  Col,
 } from 'antd';
-import { PlusOutlined, DeleteOutlined, SaveOutlined, CopyOutlined, EyeOutlined, CheckCircleOutlined, LockOutlined } from '@ant-design/icons';
+import {
+  PlusOutlined,
+  DeleteOutlined,
+  SaveOutlined,
+  CopyOutlined,
+  EyeOutlined,
+  CheckCircleOutlined,
+  LockOutlined,
+  FormOutlined,
+  QuestionCircleOutlined,
+} from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
 import { EXAM_TYPE } from '../../utils/constants';
@@ -63,7 +74,14 @@ export default function ExamCreatePage() {
     dap_an_d: '',
     dap_an_dung: 'A',
   });
-  const [createdExamModal, setCreatedExamModal] = useState({ open: false, examId: null, examName: '', passCode: '', openTime: '', closeTime: '' });
+  const [createdExamModal, setCreatedExamModal] = useState({
+    open: false,
+    examId: null,
+    examName: '',
+    passCode: '',
+    openTime: '',
+    closeTime: '',
+  });
 
   const { message } = AntApp.useApp();
   const navigate = useNavigate();
@@ -103,7 +121,9 @@ export default function ExamCreatePage() {
 
       const openStr = values.gio_mo_de ? values.gio_mo_de.format('HH:mm') : '09:30';
       const closeStr = values.gio_dong_de ? values.gio_dong_de.format('HH:mm') : '10:00';
-      const examDateStr = values.ngay_kiem_tra ? values.ngay_kiem_tra.format('YYYY-MM-DD') : dayjs().format('YYYY-MM-DD');
+      const examDateStr = values.ngay_kiem_tra
+        ? values.ngay_kiem_tra.format('YYYY-MM-DD')
+        : dayjs().format('YYYY-MM-DD');
       const passCode = values.ma_vao_thi || '1234';
       const newExamId = Math.floor(100 + Math.random() * 900);
 
@@ -148,10 +168,31 @@ export default function ExamCreatePage() {
   };
 
   return (
-    <div style={{ maxWidth: 840, margin: '0 auto' }}>
-      <Title level={4}>📝 Tạo Bài Kiểm Tra Mới</Title>
+    <div style={{ maxWidth: 960, margin: '0 auto' }}>
+      <div className="edtech-page-header">
+        <div>
+          <Space align="center" size={10}>
+            <Title level={4} style={{ margin: 0, fontWeight: 800 }}>
+              Thiết Kế Đề Kiểm Tra Đánh Giá Năng Lực
+            </Title>
+            <Tag color="blue">{questions.length} câu hỏi</Tag>
+          </Space>
+          <Text type="secondary" style={{ display: 'block', marginTop: 4 }}>
+            Khởi tạo đề thi trắc nghiệm trực tuyến có mã bảo mật PIN chống thi hộ hoặc bài kiểm tra giấy trên lớp.
+          </Text>
+        </div>
+      </div>
 
-      <Card style={{ borderRadius: 12, marginBottom: 16 }}>
+      <Card
+        className="edtech-card"
+        title={
+          <Space>
+            <FormOutlined style={{ color: '#1e3a8a' }} />
+            <span>Thông Tin Chung & Cấu Hình Khung Giờ Thi</span>
+          </Space>
+        }
+        style={{ marginBottom: 20 }}
+      >
         <Form
           form={form}
           layout="vertical"
@@ -164,69 +205,97 @@ export default function ExamCreatePage() {
             ma_vao_thi: '1234',
           }}
         >
-          <Form.Item
-            name="ten_bai_kiem_tra"
-            label="Tên bài kiểm tra"
-            rules={[{ required: true, message: 'Vui lòng nhập tên bài thi!' }]}
-          >
-            <Input placeholder="Ví dụ: Từ vựng & Ngữ pháp Unit 3" />
-          </Form.Item>
+          <Row gutter={16}>
+            <Col xs={24} md={14}>
+              <Form.Item
+                name="ten_bai_kiem_tra"
+                label="Tên bài kiểm tra"
+                rules={[{ required: true, message: 'Vui lòng nhập tên bài thi!' }]}
+              >
+                <Input placeholder="Ví dụ: Từ vựng & Ngữ pháp Unit 3" />
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={10}>
+              <Form.Item
+                name="lop"
+                label="Áp dụng cho lớp học"
+                rules={[{ required: true, message: 'Chọn lớp!' }]}
+              >
+                <Select
+                  options={[
+                    { value: 'Lớp A1 - Starter', label: 'Lớp A1 - Starter' },
+                    { value: 'Lớp B2 - Intermediate', label: 'Lớp B2 - Intermediate' },
+                    { value: 'Lớp C1 - Advanced', label: 'Lớp C1 - Advanced' },
+                  ]}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
 
-          <Form.Item name="lop" label="Áp dụng cho lớp học" rules={[{ required: true, message: 'Chọn lớp!' }]}>
-            <Select
-              options={[
-                { value: 'Lớp A1 - Starter', label: 'Lớp A1 - Starter' },
-                { value: 'Lớp B2 - Intermediate', label: 'Lớp B2 - Intermediate' },
-                { value: 'Lớp C1 - Advanced', label: 'Lớp C1 - Advanced' },
-              ]}
-            />
-          </Form.Item>
-
-          <Form.Item label="Hình thức thi">
+          <Form.Item label="Hình thức tổ chức kiểm tra">
             <Radio.Group value={examType} onChange={(e) => setExamType(e.target.value)}>
-              <Radio value={EXAM_TYPE.HE_THONG}>💻 Thi trên hệ thống (Online) — Cổng mở/đóng cố định & có mã vào thi</Radio>
-              <Radio value={EXAM_TYPE.GIAY}>📝 Thi giấy (Offline) — Học sinh làm ra giấy tại lớp</Radio>
+              <Space direction="vertical" size={8}>
+                <Radio value={EXAM_TYPE.HE_THONG}>
+                  <strong>💻 Thi trên hệ thống (Online)</strong> — Cổng mở/đóng cố định, tự chấm điểm & có mã vào thi
+                </Radio>
+                <Radio value={EXAM_TYPE.GIAY}>
+                  <strong>📝 Thi giấy tại lớp (Offline)</strong> — Học sinh làm bài trên giấy, giáo viên nhập điểm
+                </Radio>
+              </Space>
             </Radio.Group>
           </Form.Item>
 
-          <Form.Item
-            name="ngay_kiem_tra"
-            label="Ngày kiểm tra"
-            rules={[{ required: true, message: 'Vui lòng chọn ngày!' }]}
-          >
-            <DatePicker format="DD/MM/YYYY" style={{ width: '100%' }} />
-          </Form.Item>
+          <Row gutter={16}>
+            <Col xs={24} sm={8}>
+              <Form.Item
+                name="ngay_kiem_tra"
+                label="Ngày kiểm tra"
+                rules={[{ required: true, message: 'Vui lòng chọn ngày!' }]}
+              >
+                <DatePicker format="DD/MM/YYYY" style={{ width: '100%' }} />
+              </Form.Item>
+            </Col>
+
+            {examType === EXAM_TYPE.HE_THONG && (
+              <>
+                <Col xs={12} sm={8}>
+                  <Form.Item
+                    name="gio_mo_de"
+                    label="Giờ mở đề (Bắt đầu)"
+                    rules={[{ required: true, message: 'Chọn giờ mở đề!' }]}
+                    extra="Trước giờ này chưa thể mở đề"
+                  >
+                    <TimePicker format="HH:mm" minuteStep={5} style={{ width: '100%' }} />
+                  </Form.Item>
+                </Col>
+                <Col xs={12} sm={8}>
+                  <Form.Item
+                    name="gio_dong_de"
+                    label="Giờ đóng cổng (Thu bài)"
+                    rules={[{ required: true, message: 'Chọn giờ đóng cổng!' }]}
+                    extra="Tự động khóa & thu bài đúng giờ"
+                  >
+                    <TimePicker format="HH:mm" minuteStep={5} style={{ width: '100%' }} />
+                  </Form.Item>
+                </Col>
+              </>
+            )}
+          </Row>
 
           {examType === EXAM_TYPE.HE_THONG && (
-            <>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                <Form.Item
-                  name="gio_mo_de"
-                  label="Giờ mở đề (Bắt đầu thi)"
-                  rules={[{ required: true, message: 'Chọn giờ mở đề!' }]}
-                  extra="Trước giờ này học sinh không thể mở bài"
-                >
-                  <TimePicker format="HH:mm" minuteStep={5} style={{ width: '100%' }} />
-                </Form.Item>
-                <Form.Item
-                  name="gio_dong_de"
-                  label="Giờ đóng cổng (Hết giờ nộp bài)"
-                  rules={[{ required: true, message: 'Chọn giờ đóng cổng!' }]}
-                  extra="Hệ thống tự động khóa & thu bài đúng giờ này"
-                >
-                  <TimePicker format="HH:mm" minuteStep={5} style={{ width: '100%' }} />
-                </Form.Item>
-              </div>
-
-              <Form.Item
-                name="ma_vao_thi"
-                label="Mã PIN / Mật khẩu vào thi (Chống thi hộ)"
-                rules={[{ required: true, message: 'Vui lòng đặt mã bảo mật vào thi!' }]}
-                extra="Giáo viên đọc mã này trong lớp để học sinh nhập vào mới được mở đề thi"
-              >
-                <Input prefix={<LockOutlined />} placeholder="Ví dụ: 1234 hoặc ENG2026" style={{ maxWidth: 260 }} />
-              </Form.Item>
-            </>
+            <Form.Item
+              name="ma_vao_thi"
+              label="Mã PIN bảo mật vào thi (Chống thi hộ)"
+              rules={[{ required: true, message: 'Vui lòng đặt mã bảo mật vào thi!' }]}
+              extra="Giáo viên cung cấp mã này trong lớp để học sinh nhập vào mới được mở đề thi"
+              style={{ marginBottom: 0 }}
+            >
+              <Input
+                prefix={<LockOutlined style={{ color: '#0284c7' }} />}
+                placeholder="Ví dụ: 1234 hoặc ENG2026"
+                style={{ maxWidth: 280, fontWeight: 700 }}
+              />
+            </Form.Item>
           )}
         </Form>
       </Card>
@@ -235,115 +304,185 @@ export default function ExamCreatePage() {
       {examType === EXAM_TYPE.HE_THONG && (
         <>
           <Card
-            title={`Thêm câu hỏi trắc nghiệm (Hiện có: ${questions.length} câu)`}
-            style={{ borderRadius: 12, marginBottom: 16 }}
+            className="edtech-card"
+            title={
+              <Space>
+                <PlusOutlined style={{ color: '#0284c7' }} />
+                <span>Soạn Câu Hỏi Trắc Nghiệm Mới</span>
+              </Space>
+            }
+            style={{ marginBottom: 20 }}
           >
             <Space direction="vertical" style={{ width: '100%' }} size="middle">
-              <Input.TextArea
-                placeholder="Nhập nội dung câu hỏi..."
-                rows={2}
-                value={currentQuestion.noi_dung}
-                onChange={(e) => setCurrentQuestion((p) => ({ ...p, noi_dung: e.target.value }))}
-              />
-              <Space wrap style={{ width: '100%' }}>
-                <Input
-                  addonBefore="A"
-                  placeholder="Đáp án A"
-                  value={currentQuestion.dap_an_a}
-                  onChange={(e) => setCurrentQuestion((p) => ({ ...p, dap_an_a: e.target.value }))}
-                  style={{ width: 240 }}
+              <div>
+                <Text strong style={{ display: 'block', marginBottom: 6 }}>
+                  Nội dung câu hỏi tiếng Anh:
+                </Text>
+                <Input.TextArea
+                  placeholder='Nhập câu hỏi (Ví dụ: Choose the correct word: "She _______ to school every morning.")'
+                  rows={2}
+                  value={currentQuestion.noi_dung}
+                  onChange={(e) => setCurrentQuestion((p) => ({ ...p, noi_dung: e.target.value }))}
                 />
-                <Input
-                  addonBefore="B"
-                  placeholder="Đáp án B"
-                  value={currentQuestion.dap_an_b}
-                  onChange={(e) => setCurrentQuestion((p) => ({ ...p, dap_an_b: e.target.value }))}
-                  style={{ width: 240 }}
-                />
-                <Input
-                  addonBefore="C"
-                  placeholder="Đáp án C"
-                  value={currentQuestion.dap_an_c}
-                  onChange={(e) => setCurrentQuestion((p) => ({ ...p, dap_an_c: e.target.value }))}
-                  style={{ width: 240 }}
-                />
-                <Input
-                  addonBefore="D"
-                  placeholder="Đáp án D"
-                  value={currentQuestion.dap_an_d}
-                  onChange={(e) => setCurrentQuestion((p) => ({ ...p, dap_an_d: e.target.value }))}
-                  style={{ width: 240 }}
-                />
-              </Space>
-              <Space>
-                <Text strong>Đáp án đúng:</Text>
-                <Radio.Group
-                  value={currentQuestion.dap_an_dung}
-                  onChange={(e) => setCurrentQuestion((p) => ({ ...p, dap_an_dung: e.target.value }))}
-                >
-                  <Radio value="A">A</Radio>
-                  <Radio value="B">B</Radio>
-                  <Radio value="C">C</Radio>
-                  <Radio value="D">D</Radio>
-                </Radio.Group>
-              </Space>
-              <Button type="dashed" icon={<PlusOutlined />} onClick={addQuestion} block>
-                Thêm câu hỏi này vào đề
-              </Button>
+              </div>
+
+              <Row gutter={[12, 12]}>
+                {['A', 'B', 'C', 'D'].map((opt) => {
+                  const key = `dap_an_${opt.toLowerCase()}`;
+                  return (
+                    <Col xs={24} sm={12} key={opt}>
+                      <Input
+                        addonBefore={<strong>{opt}</strong>}
+                        placeholder={`Nhập phương án ${opt}`}
+                        value={currentQuestion[key]}
+                        onChange={(e) =>
+                          setCurrentQuestion((p) => ({ ...p, [key]: e.target.value }))
+                        }
+                      />
+                    </Col>
+                  );
+                })}
+              </Row>
+
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: 12,
+                  background: '#f8fafc',
+                  padding: '12px 16px',
+                  borderRadius: 10,
+                  border: '1px solid #e2e8f0',
+                }}
+              >
+                <Space>
+                  <Text strong>Chọn đáp án đúng:</Text>
+                  <Radio.Group
+                    value={currentQuestion.dap_an_dung}
+                    onChange={(e) =>
+                      setCurrentQuestion((p) => ({ ...p, dap_an_dung: e.target.value }))
+                    }
+                    buttonStyle="solid"
+                  >
+                    <Radio.Button value="A">Đáp án A</Radio.Button>
+                    <Radio.Button value="B">Đáp án B</Radio.Button>
+                    <Radio.Button value="C">Đáp án C</Radio.Button>
+                    <Radio.Button value="D">Đáp án D</Radio.Button>
+                  </Radio.Group>
+                </Space>
+
+                <Button type="primary" icon={<PlusOutlined />} onClick={addQuestion}>
+                  Thêm vào đề thi
+                </Button>
+              </div>
             </Space>
           </Card>
 
           {/* Danh sách câu hỏi đã thêm */}
           {questions.length > 0 && (
-            <Card title="Danh sách câu hỏi trong đề" style={{ borderRadius: 12, marginBottom: 16 }}>
-              <List
-                dataSource={questions}
-                renderItem={(q, idx) => (
-                  <List.Item
-                    actions={[
-                      <Button
-                        danger
-                        size="small"
-                        icon={<DeleteOutlined />}
-                        onClick={() => removeQuestion(q.id)}
-                      >
-                        Xóa
-                      </Button>,
-                    ]}
+            <Card
+              className="edtech-card"
+              title={
+                <Space>
+                  <QuestionCircleOutlined style={{ color: '#1e3a8a' }} />
+                  <span>Ngân Hàng Câu Hỏi Trong Đề ({questions.length} câu)</span>
+                </Space>
+              }
+              style={{ marginBottom: 24 }}
+            >
+              <Space direction="vertical" size={12} style={{ width: '100%' }}>
+                {questions.map((q, idx) => (
+                  <div
+                    key={q.id}
+                    style={{
+                      padding: '16px 20px',
+                      borderRadius: 12,
+                      border: '1px solid #e2e8f0',
+                      background: '#ffffff',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'flex-start',
+                      gap: 16,
+                    }}
                   >
-                    <List.Item.Meta
-                      title={`Câu ${idx + 1}: ${q.noi_dung}`}
-                      description={
-                        <Space wrap>
-                          <Tag color={q.dap_an_dung === 'A' ? 'green' : 'default'}>A: {q.dap_an_a}</Tag>
-                          <Tag color={q.dap_an_dung === 'B' ? 'green' : 'default'}>B: {q.dap_an_b}</Tag>
-                          {q.dap_an_c && <Tag color={q.dap_an_dung === 'C' ? 'green' : 'default'}>C: {q.dap_an_c}</Tag>}
-                          {q.dap_an_d && <Tag color={q.dap_an_dung === 'D' ? 'green' : 'default'}>D: {q.dap_an_d}</Tag>}
-                        </Space>
-                      }
-                    />
-                  </List.Item>
-                )}
-              />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                        <Tag color="geekblue" style={{ margin: 0, fontWeight: 700 }}>
+                          Câu {idx + 1}
+                        </Tag>
+                        <Text strong style={{ fontSize: 14.5, color: '#0f172a' }}>
+                          {q.noi_dung}
+                        </Text>
+                      </div>
+                      <Space wrap size={8}>
+                        <Tag color={q.dap_an_dung === 'A' ? 'success' : 'default'}>
+                          A: {q.dap_an_a}
+                        </Tag>
+                        <Tag color={q.dap_an_dung === 'B' ? 'success' : 'default'}>
+                          B: {q.dap_an_b}
+                        </Tag>
+                        {q.dap_an_c && (
+                          <Tag color={q.dap_an_dung === 'C' ? 'success' : 'default'}>
+                            C: {q.dap_an_c}
+                          </Tag>
+                        )}
+                        {q.dap_an_d && (
+                          <Tag color={q.dap_an_dung === 'D' ? 'success' : 'default'}>
+                            D: {q.dap_an_d}
+                          </Tag>
+                        )}
+                      </Space>
+                    </div>
+                    <Button
+                      danger
+                      size="small"
+                      icon={<DeleteOutlined />}
+                      onClick={() => removeQuestion(q.id)}
+                    >
+                      Xóa
+                    </Button>
+                  </div>
+                ))}
+              </Space>
             </Card>
           )}
         </>
       )}
 
       <div style={{ textAlign: 'center', marginBottom: 40 }}>
-        <Button type="primary" size="large" icon={<SaveOutlined />} onClick={handleSubmit} style={{ height: 48, minWidth: 260, fontSize: 16 }}>
-          {examType === EXAM_TYPE.GIAY ? 'Lưu bài kiểm tra giấy' : `Tạo & Xuất Link Bài Thi (${questions.length} câu)`}
+        <Button
+          type="primary"
+          size="large"
+          className="btn-cta-orange"
+          icon={<SaveOutlined />}
+          onClick={handleSubmit}
+          style={{ height: 50, minWidth: 300, fontSize: 16, borderRadius: 10 }}
+        >
+          {examType === EXAM_TYPE.GIAY
+            ? 'Lưu bài kiểm tra giấy'
+            : `Tạo & Xuất Link Bài Thi (${questions.length} câu)`}
         </Button>
       </div>
 
       {/* Modal hiển thị link bài thi cho giáo viên */}
       <Modal
         open={createdExamModal.open}
-        onCancel={() => setCreatedExamModal({ open: false, examId: null, examName: '', passCode: '', openTime: '', closeTime: '' })}
+        onCancel={() =>
+          setCreatedExamModal({
+            open: false,
+            examId: null,
+            examName: '',
+            passCode: '',
+            openTime: '',
+            closeTime: '',
+          })
+        }
         footer={null}
         title={
           <Space>
-            <CheckCircleOutlined style={{ color: '#52c41a', fontSize: 20 }} />
+            <CheckCircleOutlined style={{ color: '#10b981', fontSize: 22 }} />
             <span>Tạo bài thi online thành công!</span>
           </Space>
         }
@@ -354,41 +493,45 @@ export default function ExamCreatePage() {
           <Alert
             type="info"
             showIcon
-            message="Khung giờ thi & Mã bảo mật"
+            message="Thông tin Cổng thi & Mã bảo mật"
             description={
-              <div>
+              <div style={{ marginTop: 4 }}>
                 • Khung giờ mở đề: <strong>{createdExamModal.openTime} - {createdExamModal.closeTime}</strong>
                 <br />
-                • Mã bảo mật vào thi (PIN): <Tag color="magenta" style={{ fontSize: 15, fontWeight: 'bold' }}>{createdExamModal.passCode}</Tag>
+                • Mã bảo mật vào thi (PIN):{' '}
+                <Tag color="magenta" style={{ fontSize: 15, fontWeight: 'bold' }}>
+                  {createdExamModal.passCode}
+                </Tag>
               </div>
             }
-            style={{ marginBottom: 16 }}
+            style={{ marginBottom: 16, borderRadius: 10 }}
           />
 
           <Paragraph>
-            Bạn hãy gửi thông tin dưới đây vào nhóm Zalo lớp để học sinh làm bài:
+            Sao chép đường dẫn dưới đây và gửi vào nhóm Zalo lớp để học viên truy cập làm bài:
           </Paragraph>
 
           <Input.Search
             value={examLink}
-            enterButton={<><CopyOutlined /> Sao chép Link & Mã</>}
+            enterButton={
+              <>
+                <CopyOutlined /> Sao chép Link & Mã
+              </>
+            }
             onSearch={handleCopyLink}
             readOnly
             size="large"
             style={{ marginBottom: 20 }}
           />
 
-          <Space style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Button
-              icon={<EyeOutlined />}
-              onClick={() => window.open(previewLink, '_blank')}
-            >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+            <Button icon={<EyeOutlined />} onClick={() => window.open(previewLink, '_blank')}>
               👁️ Mở xem thử (Chế độ Giáo viên)
             </Button>
             <Button type="primary" onClick={() => navigate('/my-classes')}>
               Hoàn thành
             </Button>
-          </Space>
+          </div>
         </div>
       </Modal>
     </div>
