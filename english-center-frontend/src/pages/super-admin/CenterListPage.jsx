@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Table, Button, Space, Input, Modal, Form, Typography, Tag, App as AntApp, DatePicker } from 'antd';
-import { PlusOutlined, SearchOutlined, KeyOutlined, CalendarOutlined, BankOutlined } from '@ant-design/icons';
+import { PlusOutlined, SearchOutlined, KeyOutlined, CalendarOutlined, BankOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { formatDate } from '../../utils/formatters';
 import dayjs from 'dayjs';
 
@@ -37,8 +37,10 @@ export default function CenterListPage() {
   const [centers, setCenters] = useState(initialCenters);
   const [searchText, setSearchText] = useState('');
   const [zaloModalOpen, setZaloModalOpen] = useState(false);
+  const [newCenterModalOpen, setNewCenterModalOpen] = useState(false);
   const [currentCenter, setCurrentCenter] = useState(null);
   const [form] = Form.useForm();
+  const [addForm] = Form.useForm();
   const { message } = AntApp.useApp();
 
   const filtered = centers.filter(
@@ -75,6 +77,24 @@ export default function CenterListPage() {
       zalo_oa_id: center.zalo_oa_id || '',
     });
     setZaloModalOpen(true);
+  };
+
+  const handleCreateCenter = async () => {
+    try {
+      const values = await addForm.validateFields();
+      const newCenter = {
+        id: Date.now(),
+        ten_trung_tam: values.ten_trung_tam,
+        sdt_admin: values.sdt_admin,
+        ngay_het_han_saas: values.ngay_het_han_saas ? values.ngay_het_han_saas.format('YYYY-MM-DD') : dayjs().add(1, 'year').format('YYYY-MM-DD'),
+        trang_thai_ban_quyen: 'HoatDong',
+        zalo_oa_id: values.zalo_oa_id || '',
+      };
+      setCenters((prev) => [newCenter, ...prev]);
+      message.success('Thêm trung tâm đối tác mới thành công!');
+      setNewCenterModalOpen(false);
+      addForm.resetFields();
+    } catch {}
   };
 
   const columns = [
@@ -137,6 +157,16 @@ export default function CenterListPage() {
           <Title level={4} style={{ margin: 0 }}>👑 Quản Trị Hệ Thống Multi-Tenant SaaS</Title>
           <Text type="secondary">Cấp phát bản quyền theo năm và cấu hình kết nối Zalo OA cho từng đối tác</Text>
         </div>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => {
+            addForm.resetFields();
+            setNewCenterModalOpen(true);
+          }}
+        >
+          Thêm trung tâm đối tác
+        </Button>
       </div>
 
       <Input
@@ -150,6 +180,32 @@ export default function CenterListPage() {
 
       <Table dataSource={filtered} columns={columns} rowKey="id" pagination={{ pageSize: 10 }} />
 
+      {/* Modal Thêm trung tâm mới */}
+      <Modal
+        open={newCenterModalOpen}
+        onCancel={() => setNewCenterModalOpen(false)}
+        onOk={handleCreateCenter}
+        title="🏢 Thêm Trung Tâm Đối Tác Mới"
+        okText="Tạo trung tâm"
+        cancelText="Đóng"
+      >
+        <Form form={addForm} layout="vertical" initialValues={{ ngay_het_han_saas: dayjs().add(1, 'year') }}>
+          <Form.Item name="ten_trung_tam" label="Tên Trung Tâm" rules={[{ required: true, message: 'Vui lòng nhập tên trung tâm!' }]}>
+            <Input placeholder="Ví dụ: Anh Ngữ VUS Cầu Giấy" />
+          </Form.Item>
+          <Form.Item name="sdt_admin" label="SĐT Quản lý / Giám đốc" rules={[{ required: true, message: 'Vui lòng nhập số điện thoại!' }]}>
+            <Input placeholder="0987654321" />
+          </Form.Item>
+          <Form.Item name="ngay_het_han_saas" label="Hạn dùng bản quyền">
+            <DatePicker format="DD/MM/YYYY" style={{ width: '100%' }} />
+          </Form.Item>
+          <Form.Item name="zalo_oa_id" label="Zalo OA ID (Tùy chọn)">
+            <Input placeholder="Để trống nếu đang dùng chế độ Mock Demo" />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* Modal Cấu hình Zalo OA */}
       <Modal
         open={zaloModalOpen}
         onCancel={() => setZaloModalOpen(false)}
@@ -166,7 +222,7 @@ export default function CenterListPage() {
         }}
       >
         <Form form={form} layout="vertical">
-          <Form.Item name="zalo_oa_id" label="Zalo OA ID" rules={[{ required: true }]}>
+          <Form.Item name="zalo_oa_id" label="Zalo OA ID" rules={[{ required: true, message: 'Vui lòng nhập Zalo OA ID' }]}>
             <Input placeholder="Ví dụ: 123456789012345" />
           </Form.Item>
           <Form.Item name="zalo_app_id" label="Zalo App ID">
@@ -183,4 +239,3 @@ export default function CenterListPage() {
     </div>
   );
 }
-

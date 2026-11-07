@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Table, Tag, DatePicker, Select, Space, Typography, Card, Row, Col, Statistic, Input } from 'antd';
-import { MessageOutlined, CheckCircleOutlined, CloseCircleOutlined, WarningOutlined, SearchOutlined } from '@ant-design/icons';
+import { Table, Tag, DatePicker, Select, Space, Typography, Card, Row, Col, Statistic, Input, Button, Modal } from 'antd';
+import { MessageOutlined, CheckCircleOutlined, CloseCircleOutlined, WarningOutlined, SearchOutlined, EyeOutlined } from '@ant-design/icons';
 import { formatDateTime, formatPhone, getZaloStatusLabel, getZaloStatusColor } from '../../utils/formatters';
 import dayjs from 'dayjs';
 
@@ -8,10 +8,10 @@ const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 
 const mockZaloLogs = [
-  { id: 1, thoi_gian: '2026-11-05T17:35:00', hoc_sinh: 'Nguyễn Văn An', lop: 'Lớp A1 - Starter', loai_tin: 'bao_vang', sdt_nhan: '0901234567', noi_dung: 'Kính gửi phụ huynh bé Nguyễn Văn An, Trung tâm xin thông báo: Hôm nay bé vắng mặt trong buổi học ca 17h30...', trang_thai: 'ThanhCong' },
-  { id: 2, thoi_gian: '2026-11-05T17:35:01', hoc_sinh: 'Trần Thị Bảo', lop: 'Lớp A1 - Starter', loai_tin: 'bao_diem', sdt_nhan: '0912345678', noi_dung: 'Kính gửi phụ huynh bé Trần Thị Bảo, điểm bài kiểm tra: 8.5/10 - Xếp loại: Giỏi. Trân trọng!', trang_thai: 'ThanhCong' },
-  { id: 3, thoi_gian: '2026-11-05T19:01:00', hoc_sinh: 'Lê Hoàng Cường', lop: 'Lớp B2 - Intermediate', loai_tin: 'bao_vang', sdt_nhan: '0923456789', noi_dung: 'Kính gửi phụ huynh bé Lê Hoàng Cường...', trang_thai: 'ThatBai' },
-  { id: 4, thoi_gian: '2026-11-04T17:35:00', hoc_sinh: 'Phạm Minh Đức', lop: 'Lớp A1 - Starter', loai_tin: 'bao_diem', sdt_nhan: '0934567890', noi_dung: 'Điểm bài kiểm tra: 7.3/10...', trang_thai: 'Demo' },
+  { id: 1, thoi_gian: '2026-11-05T17:35:00', hoc_sinh: 'Nguyễn Văn An', lop: 'Lớp A1 - Starter', loai_tin: 'bao_vang', sdt_nhan: '0901234567', noi_dung: 'Kính gửi phụ huynh bé Nguyễn Văn An, Trung tâm Tiếng Anh xin thông báo: Hôm nay ngày 05/11, bé vắng mặt trong buổi học ca 17h30. Quý phụ huynh vui lòng liên hệ trung tâm nếu cần hỗ trợ sắp xếp lịch học bù. Trân trọng!', trang_thai: 'ThanhCong' },
+  { id: 2, thoi_gian: '2026-11-05T17:35:01', hoc_sinh: 'Trần Thị Bảo', lop: 'Lớp A1 - Starter', loai_tin: 'bao_diem', sdt_nhan: '0912345678', noi_dung: 'Kính gửi phụ huynh bé Trần Thị Bảo, Trung tâm xin gửi kết quả bài kiểm tra: Chuyên cần: Có mặt đúng giờ. Bài kiểm tra: Từ vựng Unit 3. Điểm số: 8.5 / 10 - Xếp loại: Giỏi. Trân trọng!', trang_thai: 'ThanhCong' },
+  { id: 3, thoi_gian: '2026-11-05T19:01:00', hoc_sinh: 'Lê Hoàng Cường', lop: 'Lớp B2 - Intermediate', loai_tin: 'bao_vang', sdt_nhan: '0923456789', noi_dung: 'Kính gửi phụ huynh bé Lê Hoàng Cường, hôm nay bé vắng mặt trong buổi học ca 19h00...', trang_thai: 'ThatBai' },
+  { id: 4, thoi_gian: '2026-11-04T17:35:00', hoc_sinh: 'Phạm Minh Đức', lop: 'Lớp A1 - Starter', loai_tin: 'bao_diem', sdt_nhan: '0934567890', noi_dung: 'Điểm bài kiểm tra: 7.3/10 - Xếp loại: Khá...', trang_thai: 'Demo' },
 ];
 
 export default function ZaloHistoryPage() {
@@ -37,14 +37,47 @@ export default function ZaloHistoryPage() {
     });
   }
 
+  const handleViewDetail = (record) => {
+    Modal.info({
+      title: '📱 Chi tiết nội dung tin nhắn Zalo',
+      content: (
+        <div style={{ marginTop: 16 }}>
+          <p><strong>Học sinh:</strong> {record.hoc_sinh} ({record.lop})</p>
+          <p><strong>SĐT nhận ZNS:</strong> {formatPhone(record.sdt_nhan)}</p>
+          <p><strong>Thời gian gửi:</strong> {formatDateTime(record.thoi_gian)}</p>
+          <p>
+            <strong>Trạng thái: </strong>
+            <Tag color={getZaloStatusColor(record.trang_thai)}>{getZaloStatusLabel(record.trang_thai)}</Tag>
+          </p>
+          <p style={{ marginTop: 12, marginBottom: 4 }}><strong>Nội dung đầy đủ:</strong></p>
+          <div style={{ background: '#f5f5f5', padding: 14, borderRadius: 8, whiteSpace: 'pre-wrap', fontSize: 13, border: '1px solid #e8e8e8', lineHeight: 1.6 }}>
+            {record.noi_dung}
+          </div>
+        </div>
+      ),
+      width: 520,
+      okText: 'Đóng',
+    });
+  };
+
   const columns = [
-    { title: 'Thời gian gửi', dataIndex: 'thoi_gian', key: 'time', render: (t) => formatDateTime(t), width: 160, sorter: (a, b) => new Date(a.thoi_gian) - new Date(b.thoi_gian), defaultSortOrder: 'descend' },
-    { title: 'Học sinh', dataIndex: 'hoc_sinh', key: 'hs', width: 160, render: (h) => <strong>{h}</strong> },
-    { title: 'Lớp', dataIndex: 'lop', key: 'lop', width: 160 },
-    { title: 'Loại thông báo', dataIndex: 'loai_tin', key: 'loai', width: 130, render: (t) => t === 'bao_vang' ? <Tag color="red">Báo vắng</Tag> : <Tag color="blue">Báo điểm</Tag> },
-    { title: 'SĐT Phụ huynh', dataIndex: 'sdt_nhan', key: 'sdt', render: (p) => formatPhone(p), width: 140 },
-    { title: 'Trạng thái', dataIndex: 'trang_thai', key: 'tt', width: 130, render: (s) => <Tag color={getZaloStatusColor(s)}>{getZaloStatusLabel(s)}</Tag> },
+    { title: 'Thời gian gửi', dataIndex: 'thoi_gian', key: 'time', render: (t) => formatDateTime(t), width: 150, sorter: (a, b) => new Date(a.thoi_gian) - new Date(b.thoi_gian), defaultSortOrder: 'descend' },
+    { title: 'Học sinh', dataIndex: 'hoc_sinh', key: 'hs', width: 150, render: (h) => <strong>{h}</strong> },
+    { title: 'Lớp', dataIndex: 'lop', key: 'lop', width: 150 },
+    { title: 'Loại thông báo', dataIndex: 'loai_tin', key: 'loai', width: 120, render: (t) => t === 'bao_vang' ? <Tag color="red">Báo vắng</Tag> : <Tag color="blue">Báo điểm</Tag> },
+    { title: 'SĐT Phụ huynh', dataIndex: 'sdt_nhan', key: 'sdt', render: (p) => formatPhone(p), width: 130 },
+    { title: 'Trạng thái', dataIndex: 'trang_thai', key: 'tt', width: 120, render: (s) => <Tag color={getZaloStatusColor(s)}>{getZaloStatusLabel(s)}</Tag> },
     { title: 'Nội dung tin nhắn', dataIndex: 'noi_dung', key: 'nd', ellipsis: true },
+    {
+      title: 'Thao tác',
+      key: 'action',
+      width: 90,
+      render: (_, record) => (
+        <Button size="small" icon={<EyeOutlined />} onClick={() => handleViewDetail(record)}>
+          Xem
+        </Button>
+      ),
+    },
   ];
 
   const stats = {
@@ -102,4 +135,3 @@ export default function ZaloHistoryPage() {
     </div>
   );
 }
-

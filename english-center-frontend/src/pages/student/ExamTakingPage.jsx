@@ -177,13 +177,35 @@ export default function ExamTakingPage() {
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
+  const getStudentSubmission = (studentId) => {
+    try {
+      const saved = localStorage.getItem(`exam_${examId}_student_${studentId}`);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.submitted) return parsed;
+      }
+    } catch {}
+    return null;
+  };
+
+  const handleResetForDemo = () => {
+    if (selectedStudent) {
+      localStorage.removeItem(`exam_${examId}_student_${selectedStudent.id}`);
+      setSubmitted(false);
+      setAnswers({});
+      setTimeLeft(mockExamData.thoi_gian_phut * 60);
+      setFinalScore(null);
+      setTabWarnings(0);
+    }
+  };
+
   // Màn hình chọn danh tính trước khi thi
   if (!selectedStudent) {
     return (
-      <div style={{ maxWidth: 540, margin: '60px auto', padding: 24 }}>
+      <div style={{ maxWidth: 560, margin: '60px auto', padding: 24 }}>
         <Card style={{ borderRadius: 16, boxShadow: '0 8px 24px rgba(0,0,0,0.08)' }}>
           <div style={{ textAlign: 'center', marginBottom: 20 }}>
-            <SafetyCertificateOutlined style={{ fontSize: 44, color: '#1890ff' }} />
+            <SafetyCertificateOutlined style={{ fontSize: 48, color: '#1890ff' }} />
             <Title level={3} style={{ marginTop: 12, marginBottom: 4 }}>
               Cổng Thi Trắc Nghiệm Online
             </Title>
@@ -195,17 +217,33 @@ export default function ExamTakingPage() {
           </Paragraph>
 
           <Space direction="vertical" style={{ width: '100%' }}>
-            {mockStudentsInClass.map((s) => (
-              <Button
-                key={s.id}
-                size="large"
-                block
-                style={{ textAlign: 'left', height: 48 }}
-                onClick={() => setSelectedStudent(s)}
-              >
-                👤 {s.ho_ten}
-              </Button>
-            ))}
+            {mockStudentsInClass.map((s) => {
+              const sub = getStudentSubmission(s.id);
+              return (
+                <Button
+                  key={s.id}
+                  size="large"
+                  block
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    height: 52,
+                    borderRadius: 8,
+                    borderColor: sub ? '#b7eb8f' : undefined,
+                    background: sub ? '#f6ffed' : undefined,
+                  }}
+                  onClick={() => setSelectedStudent(s)}
+                >
+                  <span>👤 <strong>{s.ho_ten}</strong></span>
+                  {sub ? (
+                    <Tag color="green">Đã nộp: {sub.score}/10 điểm</Tag>
+                  ) : (
+                    <Tag color="blue">Chưa làm bài</Tag>
+                  )}
+                </Button>
+              );
+            })}
           </Space>
         </Card>
       </div>
@@ -227,8 +265,16 @@ export default function ExamTakingPage() {
                 type="info"
                 showIcon
                 message="Kết quả đã được ghi nhận vào hệ thống và sẽ gửi thông báo điểm tới phụ huynh qua Zalo vào cuối ca học."
-                style={{ textAlign: 'left', marginTop: 16 }}
+                style={{ textAlign: 'left', marginTop: 16, marginBottom: 20 }}
               />,
+              <Space key="actions" wrap style={{ justifyContent: 'center' }}>
+                <Button onClick={() => setSelectedStudent(null)}>
+                  Chọn học sinh khác
+                </Button>
+                <Button type="dashed" danger onClick={handleResetForDemo}>
+                  🔄 Làm lại bài (Reset Demo Test)
+                </Button>
+              </Space>
             ]}
           />
         </Card>

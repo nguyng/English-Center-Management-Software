@@ -66,6 +66,7 @@ export default function Sidebar({ collapsed, onCollapse }) {
       collapsible
       collapsed={collapsed}
       onCollapse={onCollapse}
+      breakpoint="lg"
       style={{
         overflow: 'auto',
         height: '100vh',

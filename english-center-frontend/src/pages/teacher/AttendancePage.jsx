@@ -254,6 +254,21 @@ export default function AttendancePage() {
     });
   }
 
+  // Cột nhận xét từng học sinh (gửi kèm Zalo)
+  columns.push({
+    title: 'Nhận xét buổi học (khen ngợi / nhắc nhở / lý do vắng)',
+    key: 'note',
+    render: (_, record) => (
+      <Input
+        placeholder={record.trangThai === ATTENDANCE_STATUS.VANG ? 'Nhập lý do vắng (nếu có)...' : 'Nhận xét bé hôm nay...'}
+        value={notes[record.id] || ''}
+        onChange={(e) => setNotes((prev) => ({ ...prev, [record.id]: e.target.value }))}
+        size="small"
+        allowClear
+      />
+    ),
+  });
+
   // Tóm tắt thông báo sẽ gửi
   const buildSummary = () => {
     const absent = mockStudents.filter((s) => attendance[s.id] === ATTENDANCE_STATUS.VANG);
@@ -264,7 +279,10 @@ export default function AttendancePage() {
 
     if (absent.length > 0) {
       lines.push(`\n🔔 Sẽ gửi tin BÁO VẮNG cho ${absent.length} phụ huynh:`);
-      absent.forEach((s) => lines.push(`   • ${s.ho_ten} (${s.sdt_phu_huynh})`));
+      absent.forEach((s) => {
+        const noteStr = notes[s.id] ? ` (Ghi chú: "${notes[s.id]}")` : '';
+        lines.push(`   • ${s.ho_ten} (${s.sdt_phu_huynh})${noteStr}`);
+      });
     }
 
     if (hasExam && examType) {
@@ -273,11 +291,20 @@ export default function AttendancePage() {
         lines.push(`\n📝 Thi online — Hệ thống sẽ tự chấm và gửi điểm cuối ca.`);
       } else if (scored.length > 0) {
         lines.push(`\n📝 Sẽ gửi tin BÁO ĐIỂM cho ${scored.length} học sinh:`);
-        scored.forEach((s) => lines.push(`   • ${s.ho_ten}: ${formatScore(scores[s.id])}/10`));
+        scored.forEach((s) => {
+          const noteStr = notes[s.id] ? ` — Nhận xét: "${notes[s.id]}"` : '';
+          lines.push(`   • ${s.ho_ten}: ${formatScore(scores[s.id])}/10${noteStr}`);
+        });
       }
     }
 
-    if (!hasExam && absent.length === 0) {
+    // Các bạn có mặt không kiểm tra nhưng có nhận xét
+    const presentWithNotesOnly = present.filter((s) => notes[s.id]?.trim() && (!hasExam || examType !== EXAM_TYPE.GIAY || scores[s.id] === null || scores[s.id] === undefined));
+    if (presentWithNotesOnly.length > 0 && !hasExam) {
+      lines.push(`\n💬 Có ${presentWithNotesOnly.length} học sinh được thêm nhận xét chuyên cần.`);
+    }
+
+    if (!hasExam && absent.length === 0 && presentWithNotesOnly.length === 0) {
       lines.push(`\n✅ Không có học sinh vắng, không có kiểm tra → Không gửi tin nào.`);
     }
 

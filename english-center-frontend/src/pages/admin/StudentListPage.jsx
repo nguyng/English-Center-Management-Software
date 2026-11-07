@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Table, Button, Space, Input, Modal, Form, Select, Typography, App as AntApp, Tag } from 'antd';
-import { PlusOutlined, SearchOutlined, EditOutlined, UserSwitchOutlined } from '@ant-design/icons';
+import { PlusOutlined, SearchOutlined, EditOutlined, UserSwitchOutlined, DeleteOutlined } from '@ant-design/icons';
 import PhoneInput from '../../components/PhoneInput';
 import StatusBadge from '../../components/StatusBadge';
 import { formatDate, formatPhone } from '../../utils/formatters';
@@ -59,6 +59,26 @@ export default function StudentListPage() {
           </Button>
           <Button size="small" icon={<UserSwitchOutlined />} onClick={() => handleChangeStatus(record)}>
             Đổi TT
+          </Button>
+          <Button
+            size="small"
+            danger
+            icon={<DeleteOutlined />}
+            onClick={() => {
+              Modal.confirm({
+                title: 'Xóa học sinh?',
+                content: `Bạn có chắc chắn muốn xóa hồ sơ của ${record.ho_ten}?`,
+                okText: 'Xóa',
+                cancelText: 'Hủy',
+                okButtonProps: { danger: true },
+                onOk: () => {
+                  setStudents((prev) => prev.filter((s) => s.id !== record.id));
+                  message.success(`Đã xóa học sinh ${record.ho_ten}!`);
+                },
+              });
+            }}
+          >
+            Xóa
           </Button>
         </Space>
       ),
