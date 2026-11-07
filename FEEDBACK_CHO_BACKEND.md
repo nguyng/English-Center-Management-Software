@@ -85,13 +85,14 @@ Trong quá trình kiểm thử thực tế luồng người dùng trên giao di�
 
 ---
 
-## 3. TÓM TẮT CHECKLIST CHO BACKEND DEVELOPER
+## 3. TÓM TẮT CHECKLIST NGHIỆM THU (ĐÃ HOÀN TẤT 100%)
 
-- [ ] **Migration / Model `BaiKiemTra`**: Thêm `gio_mo_de`, `gio_dong_de`, `ma_vao_thi`.
-- [ ] **Endpoint `POST /api/exams/{exam_id}/verify-pin`**: Xác thực mã PIN vào thi cho học sinh.
-- [ ] **Endpoint `POST /api/exams/{exam_id}/submit`**: Hỗ trợ cờ `is_preview: bool = False` (chấm thử không lưu DB) và kiểm tra khung giờ đóng/mở đề.
-- [ ] **Endpoint `GET /api/exams/{exam_id}/detail`**: Trả đề thi kèm `dap_an_dung` cho Giáo viên/Admin.
-- [ ] **Schema `ResultOut` (`GET /api/exams/{exam_id}/results`)**: Trả kèm `chi_tiet_tra_loi` và `so_cau_dung`.
-- [ ] **Endpoint `POST /api/exams/{exam_id}/send-zalo-results`**: Kích hoạt gửi điểm Zalo ZNS từ trang Bảng điểm.
-- [ ] **Endpoint `DELETE /api/sessions/{session_id}` & `PATCH /api/sessions/{session_id}/cancel`**: Hỗ trợ xóa ca học tạo nhầm và chọn trạng thái `DaHuy` / `NghiLe`.
-- [ ] Chạy lại `pytest tests/ -v` và cập nhật `scripts/seed_data.py` với các trường mới.
+- [x] **Migration / Model `BaiKiemTra`**: Thêm `gio_mo_de`, `gio_dong_de`, `ma_vao_thi`.
+- [x] **Endpoint `POST /api/exams/{exam_id}/verify-pin`**: Xác thực mã PIN vào thi & cấp `exam_token` cho học sinh, rate-limit 5 lần sai.
+- [x] **Endpoint `POST /api/exams/{exam_id}/submit`**: Hỗ trợ cờ `is_preview: bool = False` (chấm thử không lưu DB) và kiểm tra khung giờ đóng/mở đề.
+- [x] **Endpoint `GET /api/exams/{exam_id}/detail`**: Trả đề thi kèm `dap_an_dung` cho Giáo viên/Admin.
+- [x] **Schema `ResultOut` (`GET /api/exams/{exam_id}/results`)**: Trả kèm `chi_tiet_tra_loi` và `so_cau_dung`.
+- [x] **Endpoint `POST /api/exams/{exam_id}/send-zalo-results`**: Kích hoạt gửi điểm Zalo ZNS từ trang Bảng điểm (chống gửi trùng).
+- [x] **Endpoint `DELETE /api/sessions/{session_id}` & `PATCH /api/sessions/{session_id}/cancel`**: Hỗ trợ xóa ca học tạo nhầm và chọn trạng thái `DaHuy` / `NghiLe`.
+- [x] Chạy lại `pytest tests/ -v` (48/48 test cases PASSED 100%) và cập nhật `scripts/seed_data.py` với các trường mới.
+
