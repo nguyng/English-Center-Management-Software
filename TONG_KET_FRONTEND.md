@@ -89,22 +89,36 @@ src/
 - Dành cho trường hợp sau giờ học giáo viên mới chấm xong bài thi giấy.
 - **Bảo vệ giấc ngủ phụ huynh (Khung giờ an toàn 07:00 - 21:30):** Nếu giáo viên bấm lưu điểm sau 21:30 đêm hoặc trước 07:00 sáng, hệ thống tự động cảnh báo và đề xuất: *"Hẹn giờ tự động gửi vào 07:30 sáng mai"*.
 
-#### 3. Tạo đề thi online trắc nghiệm (`ExamCreatePage.jsx`)
-- Giáo viên đặt tên bài kiểm tra, cấu hình thời gian thi (phút).
-- Thêm từng câu hỏi trắc nghiệm, các lựa chọn A, B, C, D và tích chọn đáp án đúng.
+#### 3. Tạo đề thi online trắc nghiệm & Cấu hình bảo mật (`ExamCreatePage.jsx`)
+- Giáo viên chọn Lớp học áp dụng, đặt tên bài kiểm tra.
+- **Khung giờ thi cố định:** Cài đặt **Giờ mở đề** (ví dụ `09:30`) và **Giờ đóng cổng** (ví dụ `10:00`).
+- **Mã PIN vào thi (Chống thi hộ):** Giáo viên đặt mã bảo mật (ví dụ `1234`), chỉ cấp cho học sinh trong lớp.
+- Thêm từng câu hỏi trắc nghiệm, các lựa chọn A, B, C, D và chọn đáp án đúng.
+- Tạo xong tự động xuất đường link làm bài kèm nút sao chép link và nút mở xem thử (Preview Mode).
 
-#### 4. Xem lớp phụ trách & Lịch dạy (`MyClassesPage.jsx`, `MySchedulePage.jsx`)
+#### 4. Xem bảng điểm & Chi tiết bài làm học sinh (`ExamResultsPage.jsx` - Mới)
+- Thống kê sĩ số lớp, số học sinh đã nộp bài, điểm trung bình, điểm cao nhất.
+- Bảng danh sách học sinh kèm trạng thái, thời gian nộp, số câu đúng, điểm số và xếp loại.
+- **Xem chi tiết bài làm:** Click xem từng câu học sinh chọn đáp án nào, đúng/sai thế nào so với đáp án chuẩn.
+- Nút **[Gửi báo điểm Zalo]** để phát lệnh gửi tin nhắn kết quả đến phụ huynh.
+
+#### 5. Xem lớp phụ trách & Lịch dạy (`MyClassesPage.jsx`, `MySchedulePage.jsx`)
 - Giáo viên chỉ nhìn thấy các lớp mình được phân công (đảm bảo bảo mật không xem chéo lớp).
-- Hiển thị trực quan buổi học hôm nay đã điểm danh hay chưa kèm nút tắt dẫn thẳng vào điểm danh.
+- Hiển thị trực quan buổi học hôm nay đã điểm danh hay chưa kèm nút tắt dẫn thẳng vào điểm danh và xem bảng điểm bài thi.
 
 ---
 
 ### 🎓 B. Phân Hệ Học Sinh (Student)
 
 #### Cổng Thi Trắc Nghiệm Online (`ExamTakingPage.jsx` - Đường dẫn: `/thi/:examId`)
-- **Không cần tài khoản:** Học sinh truy cập link bài thi, chỉ cần chọn đúng tên mình trong danh sách lớp.
+- **Không cần tài khoản:** Học sinh truy cập link bài thi, chọn đúng tên mình trong danh sách lớp.
+- **Bảo mật mã PIN:** Bắt buộc nhập đúng mã bảo mật do giáo viên cung cấp tại lớp mới được mở đề (chống thi hộ).
+- **Khung giờ thi cố định:**
+  - Trước giờ mở đề: Cổng thi bị khóa, hiển thị đồng hồ đếm ngược chờ mở.
+  - Trong giờ thi: Thời gian đếm ngược chính xác từ giờ hiện tại đến giờ đóng cổng (vào muộn sẽ bị trừ bớt thời gian).
+  - Hết giờ đóng cổng: Tự động khóa và thu bài (Auto-Submit).
+- **Tách biệt Chế độ Giáo viên Xem thử (`?preview=true`):** Giáo viên mở xem thử đề sẽ có banner cảnh báo riêng, bài làm thử không bị ghi đè hay làm mất dữ liệu của học sinh thật.
 - **Cơ chế chống mất bài khi rớt mạng / sập nguồn:** Mọi đáp án học sinh tick chọn đều được tự động lưu ngay vào `localStorage`. F5 trình duyệt hoặc mở lại link vẫn tiếp tục bài thi bình thường.
-- **Đồng hồ đếm ngược:** Đếm lùi theo thời gian quy định. Khi đồng hồ về `00:00`, tự động khóa form và nộp bài (Auto-Submit).
 - **Cơ chế chống gian lận chuyển tab (`visibilitychange`):**
   - Học sinh chuyển tab để tra từ điển / Google lần 1: Hệ thống phát cảnh báo vi phạm.
   - Học sinh chuyển tab lần 2: Tự động tịch thu bài thi và nộp ngay lập tức.
@@ -123,12 +137,14 @@ src/
 - Danh sách học sinh kèm lớp và ngày nhập học.
 - **Validate số điện thoại VN:** Form chỉ cho phép lưu SĐT đúng chuẩn (10 chữ số, đầu 03, 05, 07, 08, 09) để đảm bảo không bị lỗi khi gửi ZNS.
 - Quản lý trạng thái: `Đang học`, `Bảo lưu`, `Đã nghỉ`. (Học sinh nghỉ/bảo lưu sẽ tự ẩn khỏi danh sách điểm danh hàng ngày).
+- Bổ sung nút **Xóa học sinh** nếu tạo nhầm.
 
 #### 3. Quản lý Lớp & Giáo viên (`ClassListPage.jsx`, `TeacherListPage.jsx`)
 - Tạo mới và phân công giáo viên phụ trách từng lớp.
-- Tạo tài khoản đăng nhập cho giáo viên.
+- Tạo tài khoản đăng nhập cho giáo viên, phân công nhiều lớp phụ trách, khóa/mở khóa tài khoản giáo viên trực tiếp.
 
 #### 4. Quản lý Lịch Dạy & An Toàn Lưới (`SchedulePage.jsx`, `AttendanceAlertPage.jsx`)
+- **Lên lịch ca học mới:** Admin bấm nút **`+ Lên lịch ca học mới`** để chọn lớp, ngày học, giờ bắt đầu/kết thúc và phân công giáo viên phụ trách.
 - **Hủy buổi học / Báo nghỉ lễ:** Admin có thể đánh dấu buổi học thành `Nghỉ lễ` hoặc `Đã hủy`. Khi đó hệ thống sẽ **vô hiệu hóa Cron Job cuối ca**, tuyệt đối không bắn tin nhắn nhầm cho phụ huynh.
 - **Chỉ định giáo viên dạy thay:** Phân công giáo viên khác dạy thay khi có người báo bận đột xuất.
 - **Admin điểm danh hộ:** Nếu giáo viên quên điểm danh cả ca, Admin có quyền can thiệp điểm danh hộ trực tiếp.
