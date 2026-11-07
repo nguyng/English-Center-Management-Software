@@ -19,40 +19,20 @@ export default function LoginPage() {
   const handleSubmit = async (values) => {
     setLoading(true);
     try {
-      const decoded = await login(values.email, values.password);
-      message.success(`Chào mừng ${decoded.ho_ten || 'bạn'}!`);
-      if (decoded.vai_tro === ROLES.SUPER_ADMIN) {
-        navigate('/super-admin/centers');
-      } else if (decoded.vai_tro === ROLES.GIAO_VIEN) {
-        navigate('/my-classes');
+      const user = await login(values.email, values.password);
+      message.success(`Đăng nhập thành công! Chào mừng ${user.ho_ten || 'bạn'}`);
+
+      // Điều hướng tới trang tương ứng với Role
+      if (user.vai_tro === ROLES.SUPER_ADMIN) {
+        navigate('/super-admin/centers', { replace: true });
+      } else if (user.vai_tro === ROLES.GIAO_VIEN) {
+        navigate('/my-classes', { replace: true });
       } else {
-        navigate(from);
+        navigate(from === '/login' ? '/dashboard' : from, { replace: true });
       }
     } catch (error) {
-      // Fallback cho demo khi chưa kết nối API backend thật
-      console.warn('API login error, fallback to demo mode:', error);
-      let role = ROLES.ADMIN;
-      let hoTen = 'Quản Trị Viên';
-      if (values.email.includes('teacher') || values.email.includes('gv')) {
-        role = ROLES.GIAO_VIEN;
-        hoTen = 'Thầy Giáo Nguyễn Văn A';
-      } else if (values.email.includes('super')) {
-        role = ROLES.SUPER_ADMIN;
-        hoTen = 'Super Admin';
-      }
-      
-      const demoToken = btoa(JSON.stringify({
-        id: 1,
-        ho_ten: hoTen,
-        email: values.email,
-        vai_tro: role,
-        trung_tam_id: 1,
-        exp: Math.floor(Date.now() / 1000) + 86400 * 7,
-      }));
-      
-      // Save mock token
-      localStorage.setItem('access_token', demoToken);
-      window.location.href = role === ROLES.GIAO_VIEN ? '/my-classes' : (role === ROLES.SUPER_ADMIN ? '/super-admin/centers' : '/dashboard');
+      console.error('Lỗi đăng nhập:', error);
+      message.error(error?.message || 'Đăng nhập không thành công, vui lòng thử lại!');
     } finally {
       setLoading(false);
     }
@@ -114,7 +94,7 @@ export default function LoginPage() {
             </Form.Item>
 
             <div style={{ background: '#f5f5f5', padding: '10px 14px', borderRadius: 8, fontSize: 13, color: '#666' }}>
-              💡 <strong>Gợi ý demo nhanh:</strong>
+              💡 <strong>Gợi ý tài khoản demo:</strong>
               <br />• Admin: <code>admin@center.com</code>
               <br />• Giáo viên: <code>teacher@center.com</code>
               <br />• Super Admin: <code>super@saas.com</code>
@@ -125,4 +105,3 @@ export default function LoginPage() {
     </div>
   );
 }
-
