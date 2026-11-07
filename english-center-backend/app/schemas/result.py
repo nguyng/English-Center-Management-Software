@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Any, Dict, Optional
 from pydantic import BaseModel
 
 class ResultOut(BaseModel):
@@ -11,6 +11,8 @@ class ResultOut(BaseModel):
     so_lan_roi_tab: int = 0
     thoi_gian_nop: datetime
     xep_loai: str
+    chi_tiet_tra_loi: Optional[Dict[str, Any]] = None
+    so_cau_dung: Optional[int] = None
 
 class StudentResultOut(BaseModel):
     id: int
@@ -20,4 +22,3 @@ class StudentResultOut(BaseModel):
     diem_so: float
     xep_loai: str
     thoi_gian_nop: datetime
-

@@ -11,7 +11,8 @@ class SessionCreate(BaseModel):
     co_kiem_tra: bool = False
 
 class SessionCancelIn(BaseModel):
-    reason: str = Field(..., min_length=2)
+    reason: Optional[str] = Field(default="Hủy buổi học")
+    trang_thai_buoi_hoc: Optional[str] = Field(default="DaHuy", pattern=r"^(DaHuy|NghiLe)$")
 
 class SessionSubstituteIn(BaseModel):
     giao_vien_id: int
@@ -31,4 +32,3 @@ class SessionOut(BaseModel):
     trang_thai_diem_danh: str
     trang_thai_buoi_hoc: str
     ly_do_huy: Optional[str] = None
-

@@ -45,19 +45,29 @@ class ResultService:
         result = await db.execute(query)
         records = result.scalars().all()
 
-        return [
-            ResultOut(
-                id=r.id,
-                hoc_sinh_id=r.hoc_sinh_id,
-                ho_ten=r.student.ho_ten if r.student else "Chưa rõ",
-                diem_so=float(r.diem_so),
-                diem_thu_cong=float(r.diem_thu_cong) if r.diem_thu_cong is not None else None,
-                so_lan_roi_tab=r.so_lan_roi_tab,
-                thoi_gian_nop=r.thoi_gian_nop,
-                xep_loai=calculate_rank(float(r.diem_so))
+        results = []
+        for r in records:
+            correct_count = 0
+            if r.chi_tiet_tra_loi and isinstance(r.chi_tiet_tra_loi, dict):
+                correct_count = sum(
+                    1 for v in r.chi_tiet_tra_loi.values()
+                    if isinstance(v, dict) and v.get("is_correct")
+                )
+            results.append(
+                ResultOut(
+                    id=r.id,
+                    hoc_sinh_id=r.hoc_sinh_id,
+                    ho_ten=r.student.ho_ten if r.student else "Chưa rõ",
+                    diem_so=float(r.diem_so),
+                    diem_thu_cong=float(r.diem_thu_cong) if r.diem_thu_cong is not None else None,
+                    so_lan_roi_tab=r.so_lan_roi_tab,
+                    thoi_gian_nop=r.thoi_gian_nop,
+                    xep_loai=calculate_rank(float(r.diem_so)),
+                    chi_tiet_tra_loi=r.chi_tiet_tra_loi,
+                    so_cau_dung=correct_count
+                )
             )
-            for r in records
-        ]
+        return results
 
     @staticmethod
     async def get_results_by_student(

@@ -215,16 +215,31 @@ async def test_data(db_session: AsyncSession):
     db_session.add(session1)
     await db_session.flush()
 
-    # Exam in Center 1
+    # Exam in Center 1 (Legacy unrestricted exam for regression tests)
     exam1 = BaiKiemTra(
         trung_tam_id=center1.id,
         buoi_hoc_id=session1.id,
         ten_bai_kiem_tra="Quiz Unit 1",
         hinh_thuc=ExamFormat.ONLINE.value,
         ngay_kiem_tra=today,
-        thoi_gian_phut=15
+        thoi_gian_phut=15,
+        gio_mo_de="00:00",
+        gio_dong_de="23:59",
+        ma_vao_thi=None
     )
-    db_session.add(exam1)
+    # Pinned Exam with fixed time window
+    exam_pinned = BaiKiemTra(
+        trung_tam_id=center1.id,
+        buoi_hoc_id=session1.id,
+        ten_bai_kiem_tra="Quiz Unit 2 Pinned",
+        hinh_thuc=ExamFormat.ONLINE.value,
+        ngay_kiem_tra=today,
+        thoi_gian_phut=20,
+        gio_mo_de="08:00",
+        gio_dong_de="22:00",
+        ma_vao_thi="1234"
+    )
+    db_session.add_all([exam1, exam_pinned])
     await db_session.flush()
 
     q1 = CauHoi(
@@ -247,7 +262,27 @@ async def test_data(db_session: AsyncSession):
         dap_an_d="6",
         dap_an_dung="B"
     )
-    db_session.add_all([q1, q2])
+    qp1 = CauHoi(
+        bai_kiem_tra_id=exam_pinned.id,
+        thu_tu=1,
+        noi_dung="Opposite of Generous?",
+        dap_an_a="Selfish",
+        dap_an_b="Kind",
+        dap_an_c="Helpful",
+        dap_an_d="Polite",
+        dap_an_dung="A"
+    )
+    qp2 = CauHoi(
+        bai_kiem_tra_id=exam_pinned.id,
+        thu_tu=2,
+        noi_dung="Past tense of write?",
+        dap_an_a="Writed",
+        dap_an_b="Wrote",
+        dap_an_c="Written",
+        dap_an_d="Writing",
+        dap_an_dung="B"
+    )
+    db_session.add_all([q1, q2, qp1, qp2])
 
     await db_session.commit()
 
@@ -304,8 +339,11 @@ async def test_data(db_session: AsyncSession):
         "student_dropped": student_dropped,
         "session1": session1,
         "exam1": exam1,
+        "exam_pinned": exam_pinned,
         "q1": q1,
         "q2": q2,
+        "qp1": qp1,
+        "qp2": qp2,
         "tokens": {
             "super": super_token,
             "admin1": admin1_token,

@@ -1,17 +1,22 @@
 from datetime import date
-from typing import List, Optional
-from sqlalchemy import select
+from typing import Any, Dict, List, Optional
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.core.constants import SessionAttendanceStatus, SessionStatus, UserRole
 from app.core.exceptions import (
+    BusinessRuleViolationException,
     ForbiddenException,
     ResourceNotFoundException
 )
+from app.models.attendance import DiemDanh
 from app.models.class_room import LopHoc
+from app.models.exam import BaiKiemTra
+from app.models.result import KetQua
 from app.models.session import BuoiHoc
 from app.models.user import NguoiDung
+from app.models.zalo_log import NhatKyZalo
 from app.schemas.session import SessionCreate, SessionOut
 
 class SessionService:
@@ -166,7 +171,13 @@ class SessionService:
         )
 
     @staticmethod
-    async def cancel_session(db: AsyncSession, tenant_id: int, session_id: int, reason: str) -> SessionOut:
+    async def cancel_session(
+        db: AsyncSession,
+        tenant_id: int,
+        session_id: int,
+        reason: Optional[str] = "Hủy buổi học",
+        cancel_status: Optional[str] = SessionStatus.CANCELLED.value
+    ) -> SessionOut:
         query = select(BuoiHoc).options(
             selectinload(BuoiHoc.class_room).selectinload(LopHoc.teacher),
             selectinload(BuoiHoc.substitute_teacher)
@@ -176,8 +187,14 @@ class SessionService:
         if not s:
             raise ResourceNotFoundException(f"Không tìm thấy buổi học có ID {session_id}")
 
-        s.trang_thai_buoi_hoc = SessionStatus.CANCELLED.value
-        s.ly_do_huy = reason.strip()
+        target_status = cancel_status or SessionStatus.CANCELLED.value
+        if target_status not in [SessionStatus.CANCELLED.value, SessionStatus.HOLIDAY.value]:
+            raise BusinessRuleViolationException(
+                f"Trạng thái không hợp lệ: '{target_status}'. Chỉ chấp nhận 'DaHuy' hoặc 'NghiLe'."
+            )
+
+        s.trang_thai_buoi_hoc = target_status
+        s.ly_do_huy = reason.strip() if reason else ("Nghỉ lễ" if target_status == SessionStatus.HOLIDAY.value else "Hủy buổi học")
         await db.commit()
         await db.refresh(s)
 
@@ -201,6 +218,75 @@ class SessionService:
             trang_thai_buoi_hoc=s.trang_thai_buoi_hoc,
             ly_do_huy=s.ly_do_huy
         )
+
+    @staticmethod
+    async def delete_session(
+        db: AsyncSession,
+        tenant_id: int,
+        current_user: NguoiDung,
+        session_id: int
+    ) -> Dict[str, Any]:
+        """Safely delete an accidentally created session.
+        Only Admin / SuperAdmin can delete.
+        Fails if session already has attendance data, exam results, or Zalo history.
+        """
+        if current_user.vai_tro not in [UserRole.ADMIN.value, UserRole.SUPER_ADMIN.value]:
+            raise ForbiddenException("Chỉ Quản trị viên mới có quyền xóa ca học")
+
+        query = select(BuoiHoc).where(BuoiHoc.id == session_id)
+        if current_user.vai_tro != UserRole.SUPER_ADMIN.value:
+            query = query.where(BuoiHoc.trung_tam_id == tenant_id)
+
+        result = await db.execute(query)
+        s = result.scalar_one_or_none()
+        if not s:
+            raise ResourceNotFoundException(f"Không tìm thấy buổi học có ID {session_id}")
+
+        # Check if attendance is already taken
+        if s.trang_thai_diem_danh == SessionAttendanceStatus.TAKEN.value:
+            raise BusinessRuleViolationException(
+                "Không thể xóa ca học đã hoàn tất điểm danh. Vui lòng sử dụng tính năng Hủy ca học.",
+                error_code="SESSION_HAS_ATTENDANCE"
+            )
+
+        att_count = await db.scalar(
+            select(func.count(DiemDanh.id)).where(DiemDanh.buoi_hoc_id == session_id)
+        )
+        if att_count and att_count > 0:
+            raise BusinessRuleViolationException(
+                "Không thể xóa ca học đã có dữ liệu điểm danh. Vui lòng sử dụng tính năng Hủy ca học.",
+                error_code="SESSION_HAS_ATTENDANCE"
+            )
+
+        # Check if any exam results exist
+        exam_ids_res = await db.execute(
+            select(BaiKiemTra.id).where(BaiKiemTra.buoi_hoc_id == session_id)
+        )
+        exam_ids = exam_ids_res.scalars().all()
+        if exam_ids:
+            res_count = await db.scalar(
+                select(func.count(KetQua.id)).where(KetQua.bai_kiem_tra_id.in_(exam_ids))
+            )
+            if res_count and res_count > 0:
+                raise BusinessRuleViolationException(
+                    "Không thể xóa ca học đã có kết quả bài thi của học sinh. Vui lòng sử dụng tính năng Hủy ca học.",
+                    error_code="SESSION_HAS_EXAM_RESULTS"
+                )
+
+        # Check if any Zalo logs exist
+        zalo_count = await db.scalar(
+            select(func.count(NhatKyZalo.id)).where(NhatKyZalo.buoi_hoc_id == session_id)
+        )
+        if zalo_count and zalo_count > 0:
+            raise BusinessRuleViolationException(
+                "Không thể xóa ca học đã có lịch sử gửi tin nhắn Zalo.",
+                error_code="SESSION_HAS_ZALO_LOGS"
+            )
+
+        # Safe to delete
+        await db.delete(s)
+        await db.commit()
+        return {"id": session_id, "message": "Xóa ca học thành công"}
 
     @staticmethod
     async def substitute_teacher(db: AsyncSession, tenant_id: int, session_id: int, teacher_id: int) -> SessionOut:

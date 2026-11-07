@@ -57,8 +57,24 @@ async def cancel_session(
     current_user: NguoiDung = Depends(require_role([UserRole.ADMIN])),
     db: AsyncSession = Depends(get_db)
 ):
-    session = await SessionService.cancel_session(db, tenant_id, session_id, data.reason)
+    session = await SessionService.cancel_session(
+        db,
+        tenant_id,
+        session_id,
+        reason=data.reason,
+        cancel_status=data.trang_thai_buoi_hoc
+    )
     return GenericResponse(success=True, data=session, message="Hủy ca học thành công")
+
+@router.delete("/{session_id}", response_model=GenericResponse[dict])
+async def delete_session(
+    session_id: int,
+    tenant_id: int = Depends(get_current_tenant_id),
+    current_user: NguoiDung = Depends(require_role([UserRole.ADMIN])),
+    db: AsyncSession = Depends(get_db)
+):
+    result = await SessionService.delete_session(db, tenant_id, current_user, session_id)
+    return GenericResponse(success=True, data=result, message="Xóa ca học thành công")
 
 @router.patch("/{session_id}/substitute", response_model=GenericResponse[SessionOut])
 async def substitute_teacher(
@@ -80,4 +96,3 @@ async def confirm_attendance(
 ):
     session = await SessionService.confirm_attendance(db, tenant_id, current_user, session_id)
     return GenericResponse(success=True, data=session, message="Xác nhận hoàn thành điểm danh ca học")
-

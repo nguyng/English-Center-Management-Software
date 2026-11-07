@@ -38,10 +38,15 @@ class UnauthorizedException(AppException):
         )
 
 class ForbiddenException(AppException):
-    def __init__(self, message: str = "Bạn không có quyền thực hiện hành động này", details: Optional[Any] = None):
+    def __init__(
+        self,
+        message: str = "Bạn không có quyền thực hiện hành động này",
+        error_code: str = "FORBIDDEN",
+        details: Optional[Any] = None
+    ):
         super().__init__(
             message=message,
-            error_code="FORBIDDEN",
+            error_code=error_code,
             status_code=status.HTTP_403_FORBIDDEN,
             details=details
         )

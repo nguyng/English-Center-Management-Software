@@ -6,6 +6,7 @@ import os
 # Add parent directory to sys.path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from decimal import Decimal
 from sqlalchemy import select
 from app.core.database import AsyncSessionLocal, Base, engine
 from app.core.constants import (
@@ -24,6 +25,7 @@ from app.models.class_room import LopHoc
 from app.models.student import HocSinh
 from app.models.session import BuoiHoc
 from app.models.exam import BaiKiemTra, CauHoi
+from app.models.result import KetQua
 
 async def seed_all():
     print("🌱 Bắt đầu nạp dữ liệu mẫu (Seed Data)...")
@@ -188,17 +190,48 @@ async def seed_all():
             trang_thai_diem_danh=SessionAttendanceStatus.NOT_TAKEN.value,
             trang_thai_buoi_hoc=SessionStatus.NORMAL.value
         )
-        db.add_all([session1, session2])
+        # Holiday session (NghiLe)
+        session_holiday = BuoiHoc(
+            trung_tam_id=center1.id,
+            lop_id=class1.id,
+            ngay_hoc=today + timedelta(days=1),
+            ca_hoc="17:30 - 19:00",
+            gio_bat_dau=time(17, 30),
+            gio_ket_thuc=time(19, 0),
+            co_kiem_tra=False,
+            da_gui=False,
+            trang_thai_diem_danh=SessionAttendanceStatus.NOT_TAKEN.value,
+            trang_thai_buoi_hoc=SessionStatus.HOLIDAY.value,
+            ly_do_huy="Nghỉ lễ theo lịch trung tâm"
+        )
+        # Cancelled session (DaHuy)
+        session_cancelled = BuoiHoc(
+            trung_tam_id=center1.id,
+            lop_id=class2.id,
+            ngay_hoc=today + timedelta(days=2),
+            ca_hoc="19:00 - 20:30",
+            gio_bat_dau=time(19, 0),
+            gio_ket_thuc=time(20, 30),
+            co_kiem_tra=False,
+            da_gui=False,
+            trang_thai_diem_danh=SessionAttendanceStatus.NOT_TAKEN.value,
+            trang_thai_buoi_hoc=SessionStatus.CANCELLED.value,
+            ly_do_huy="Hủy đột xuất do thời tiết xấu"
+        )
+        db.add_all([session1, session2, session_holiday, session_cancelled])
         await db.flush()
 
-        # 7. Sample Online Exam with Questions
+        # 7. Sample Online Exam with Fixed Time Slot and PIN
         exam1 = BaiKiemTra(
             trung_tam_id=center1.id,
             buoi_hoc_id=session1.id,
             ten_bai_kiem_tra="Kiểm tra Từ vựng Unit 3",
             hinh_thuc=ExamFormat.ONLINE.value,
             ngay_kiem_tra=today,
-            thoi_gian_phut=15
+            thoi_gian_phut=15,
+            gio_mo_de="08:00",
+            gio_dong_de="22:00",
+            ma_vao_thi="1234"
         )
         db.add(exam1)
         await db.flush()
@@ -222,6 +255,41 @@ async def seed_all():
                 dap_an_dung=q[5]
             )
             db.add(q_obj)
+
+        await db.flush()
+
+        # 8. Sample Exam Results with chi_tiet_tra_loi
+        res1 = KetQua(
+            trung_tam_id=center1.id,
+            bai_kiem_tra_id=exam1.id,
+            hoc_sinh_id=students_c1[0].id,
+            diem_so=Decimal("10.0"),
+            so_lan_roi_tab=0,
+            chi_tiet_tra_loi={
+                "1": {"selected": "A", "is_correct": True},
+                "2": {"selected": "B", "is_correct": True},
+                "3": {"selected": "C", "is_correct": True},
+                "4": {"selected": "B", "is_correct": True},
+                "5": {"selected": "B", "is_correct": True}
+            },
+            thoi_gian_nop=datetime.now(timezone.utc)
+        )
+        res2 = KetQua(
+            trung_tam_id=center1.id,
+            bai_kiem_tra_id=exam1.id,
+            hoc_sinh_id=students_c1[1].id,
+            diem_so=Decimal("8.0"),
+            so_lan_roi_tab=1,
+            chi_tiet_tra_loi={
+                "1": {"selected": "A", "is_correct": True},
+                "2": {"selected": "B", "is_correct": True},
+                "3": {"selected": "C", "is_correct": True},
+                "4": {"selected": "B", "is_correct": True},
+                "5": {"selected": "A", "is_correct": False}
+            },
+            thoi_gian_nop=datetime.now(timezone.utc)
+        )
+        db.add_all([res1, res2])
 
         await db.commit()
         print("✅ Nạp dữ liệu mẫu hoàn tất thành công!")

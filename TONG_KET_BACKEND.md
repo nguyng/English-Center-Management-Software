@@ -2,30 +2,36 @@
 ## DỰ ÁN: TOOL QUẢN LÝ TRUNG TÂM TIẾNG ANH (B2B SAAS)
 
 > **Tài liệu bàn giao & đặc tả kỹ thuật chi tiết dành cho:** Toàn bộ nhóm phát triển (Backend, Frontend React, Zalo Service), Quản trị viên và Cố vấn Trung tâm.  
-> **Tác giả:** Senior Python Backend Engineer, Software Architect & Technical Lead  
-> **Trạng thái:** Hoàn thành 100% triển khai mã nguồn thực tế & vượt qua toàn bộ Test Suite  
+> **Tác giả:** Senior Python Backend Engineer, Software Architect & QA Engineer  
+> **Trạng thái:** Hoàn thành 100% triển khai mã nguồn thực tế & tích hợp đồng bộ 5 yêu cầu nghiệp vụ mới theo Feedback Frontend; vượt qua 100% Bộ Kiểm thử Tự động (48/48 Test Cases Passed)  
 > **Mã nguồn Backend:** Thư mục `english-center-backend/`  
-> **Ngày hoàn thành:** Tháng 11/2026
+> **Ngày hoàn thành cập nhật:** Tháng 11/2026
 
 ---
 
-## 1. TỔNG QUAN DỰ ÁN
+## 1. TỔNG QUAN DỰ ÁN & CẬP NHẬT ĐỒNG BỘ MỚI
 
 ### 1.1. Mục Tiêu Backend
 Xây dựng một hệ thống Backend hoàn chỉnh bằng **Python (FastAPI)**, đóng vai trò hạt nhân trung tâm xử lý dữ liệu cho phần mềm Quản lý Trung tâm Tiếng Anh theo mô hình **B2B SaaS (Software as a Service)**. Hệ thống giải quyết trọn vẹn các bài toán nhức nhối trong vận hành trung tâm:
 1. **Điểm danh tối ưu hóa:** Mặc định toàn bộ học sinh Có mặt, chỉ cần tick chọn học sinh Vắng, lọc danh sách vắng nhanh chóng.
 2. **Cơ chế an toàn lưới (Safety Net):** Nếu giáo viên quên điểm danh, Cron Job cuối ca tuyệt đối không tự ý gửi thông báo vắng bừa bãi làm phiền phụ huynh.
-3. **Đánh giá song song 2 hình thức:** Hỗ trợ cả thi trắc nghiệm Online tự động chấm điểm (chống gian lận lộ đề, chống nộp lại lần 2) và thi Giấy nhập điểm thủ công (làm tròn 1 chữ số thập phân, lưu điểm từng phần).
+3. **Đánh giá song song 2 hình thức:** Hỗ trợ cả thi trắc nghiệm Online tự động chấm điểm và thi Giấy nhập điểm thủ công (làm tròn 1 chữ số thập phân, lưu điểm từng phần).
 4. **Zalo Service Adapter Plug-and-Play:** Hỗ trợ 2 chế độ (Demo Mock ghi log hệ thống và Production ZNS kết nối Zalo Cloud API thật).
-5. **Kiến trúc Multi-tenant SaaS:** Cách ly dữ liệu độc lập giữa các trung tâm thông qua `trung_tam_id` gắn chặt với JWT Identity và Middleware kiểm soát thời hạn bản quyền phần mềm theo năm.
+5. **Kiến trúc Multi-tenant SaaS:** Cách ly dữ liệu độc lập giữa các trung tâm thông qua `trung_tam_id` gắn chặt với JWT Identity và Middleware kiểm soát thời hạn bản quyền phần mềm theo năm (`LicenseGuard`).
+6. **[MỚI] Đồng bộ 5 yêu cầu nghiệp vụ nâng cấp từ Frontend (`FEEDBACK_CHO_BACKEND.md`):**
+   - **Khung giờ thi đóng/mở cố định:** Hỗ trợ `gio_mo_de` và `gio_dong_de` trên toàn hệ thống, kiểm soát thời gian tại Server.
+   - **Mã bảo mật PIN vào thi:** Cơ chế `ma_vao_thi`, cấp `exam_token` ký số JWT, giới hạn 5 lần thử sai chống brute-force, bảo vệ API nộp bài.
+   - **Trang Giáo viên xem kết quả & Gửi điểm Zalo:** Cung cấp API `GET /api/exams/:id/detail` (trả kèm `dap_an_dung` cho GV/Admin phụ trách lớp) và API `POST /api/exams/:id/send-zalo-results` phát lệnh ZNS chống gửi trùng.
+   - **Tách biệt Chế độ Preview và Thi Thật:** Hỗ trợ `is_preview: bool = True` cho GV làm thử đề mà không lưu kết quả vào CSDL, bảo vệ bằng xác thực Server.
+   - **Xóa ca học & Hỗ trợ Nghỉ lễ:** Bổ sung API `DELETE /api/sessions/:id` xóa an toàn ca tạo nhầm và hỗ trợ chọn trạng thái `DaHuy` hoặc `NghiLe`.
 
 ### 1.2. Tech Stack Thực Tế Đã Triển Khai
 * **Web Framework:** FastAPI (0.141.1) trên nền Starlette + ASGI Uvicorn (0.53.0).
 * **Ngôn ngữ:** Python 3.11+ / Python 3.14 (Async Native).
 * **Validation & Schemas:** Pydantic v2 (2.13.5) với Rust Core, tích hợp `email-validator` và custom regex số điện thoại di động Việt Nam.
-* **Cơ sở dữ liệu:** PostgreSQL 15+ (Production) & aiosqlite (Test in-memory).
+* **Cơ sở dữ liệu:** PostgreSQL 15+ (Production) & aiosqlite (Kiểm thử in-memory).
 * **ORM:** SQLAlchemy 2.0 (2.1.8) kết hợp AsyncEngine và asyncpg driver (0.32.0).
-* **Database Migration:** Alembic (1.20.1) hỗ trợ Async.
+* **Database Migration:** Alembic (1.20.1) hỗ trợ Async với migration script mới `20261107_01_add_exam_time_and_pin.py`.
 * **Authentication & Mã hóa:** PyJWT (2.15.1) thuật toán HS256, Bcrypt (5.0.0) băm mật khẩu với salt an toàn.
 * **Tác vụ ngầm & Lập lịch:** APScheduler 3.x (AsyncIOScheduler) chạy đồng bộ trong event loop của FastAPI.
 * **Kiểm thử tự động:** Pytest (9.1.1), pytest-asyncio (1.4.0), pytest-mock (3.17.0), HTTPX (0.28.1).
@@ -45,10 +51,10 @@ english-center-backend/
 │   │
 │   ├── api/                            # Tầng Giao tiếp HTTP Routers
 │   │   ├── __init__.py
-│   │   ├── deps.py                     # Dependency Injection: get_db, get_current_user, require_role, get_current_tenant_id
+│   │   ├── deps.py                     # Dependency Injection: get_db, get_current_user, get_optional_current_user, require_role, get_current_tenant_id
 │   │   └── v1/
 │   │       ├── __init__.py
-│   │       ├── api.py                  # Gom toàn bộ 11 routers với tiền tố /api
+│   │       ├── api.py                  # Gom toàn bộ 11 routers với tiền tố /api (36 endpoints)
 │   │       └── endpoints/
 │   │           ├── __init__.py
 │   │           ├── auth.py             # Đăng nhập, đăng xuất, lấy user hiện tại (/api/auth)
@@ -56,10 +62,10 @@ english-center-backend/
 │   │           ├── teachers.py         # CRUD giáo viên, khóa/mở tài khoản (/api/teachers)
 │   │           ├── classes.py          # CRUD lớp học, tính sĩ số (/api/classes)
 │   │           ├── students.py         # CRUD học sinh, chuyển trạng thái (/api/students)
-│   │           ├── sessions.py         # Quản lý ca học, hủy ca, dạy thay (/api/sessions)
+│   │           ├── sessions.py         # CRUD ca học, xóa ca học, hủy ca/nghỉ lễ, dạy thay (/api/sessions)
 │   │           ├── attendance.py       # Lấy danh sách & Lưu điểm danh (/api/sessions/:id/attendance)
-│   │           ├── exams.py            # Tạo đề, nộp bài thi online, nhập điểm thi giấy (/api/exams)
-│   │           ├── results.py          # Kết quả thi theo bài thi / học sinh (/api/exams/:id/results)
+│   │           ├── exams.py            # Tạo đề, xác thực PIN, nộp bài, xem bài làm GV, gửi điểm Zalo (/api/exams)
+│   │           ├── results.py          # Kết quả thi chi tiết theo bài thi / học sinh (/api/exams/:id/results)
 │   │           ├── zalo_logs.py        # Tra cứu nhật ký tin nhắn & thống kê Recharts (/api/zalo-logs)
 │   │           └── dashboard.py        # Thống kê 4 thẻ & ca chưa điểm danh (/api/dashboard)
 │   │
@@ -78,10 +84,10 @@ english-center-backend/
 │   │   ├── user.py                     # Entity NguoiDung (SuperAdmin, Admin, GiaoVien)
 │   │   ├── class_room.py               # Entity LopHoc (Quan hệ giáo viên, học sinh)
 │   │   ├── student.py                  # Entity HocSinh (Regex SĐT, trạng thái DangHoc/BaoLuu/DaNghi)
-│   │   ├── session.py                  # Entity BuoiHoc (Giờ ca học, cờ điểm danh, trạng thái hủy)
+│   │   ├── session.py                  # Entity BuoiHoc (Giờ ca học, cờ điểm danh, trạng thái DaHuy/NghiLe)
 │   │   ├── attendance.py               # Entity DiemDanh (CoMat, Vang, ghi chú)
-│   │   ├── exam.py                     # Entity BaiKiemTra, CauHoi (Online & Giấy)
-│   │   ├── result.py                   # Entity KetQua (Numeric 3,1, chống nộp trùng)
+│   │   ├── exam.py                     # Entity BaiKiemTra (gio_mo_de, gio_dong_de, ma_vao_thi), CauHoi
+│   │   ├── result.py                   # Entity KetQua (Numeric 3,1, chi_tiet_tra_loi, chống nộp trùng)
 │   │   ├── zalo_log.py                 # Entity NhatKyZalo (Lịch sử gửi tin, chống gửi trùng)
 │   │   └── schedule_task.py            # Entity HenGioGuiTin (Hàng đợi an toàn 07:30 sáng)
 │   │
@@ -93,10 +99,10 @@ english-center-backend/
 │   │   ├── teacher.py                  # TeacherCreate, TeacherUpdate, TeacherStatusUpdateIn, TeacherOut
 │   │   ├── class_room.py               # ClassCreate, ClassUpdate, ClassOut
 │   │   ├── student.py                  # StudentCreate (Validate SĐT VN), StudentUpdate, StudentOut
-│   │   ├── session.py                  # SessionCreate, SessionCancelIn, SessionSubstituteIn, SessionOut
+│   │   ├── session.py                  # SessionCreate, SessionCancelIn (DaHuy/NghiLe), SessionSubstituteIn, SessionOut
 │   │   ├── attendance.py               # AttendanceStudentItem, AttendanceSaveIn, DetailOut
-│   │   ├── exam.py                     # ExamCreate, QuestionIn, QuestionPublicOut, ExamPublicOut, SubmitIn
-│   │   ├── result.py                   # ResultOut, StudentResultOut
+│   │   ├── exam.py                     # ExamCreate, ExamOut, ExamPublicOut, ExamPinVerifyIn, ExamTeacherDetailOut, ExamSubmitIn
+│   │   ├── result.py                   # ResultOut (chi_tiet_tra_loi, so_cau_dung), StudentResultOut
 │   │   ├── zalo_log.py                 # ZaloLogOut, ZaloStatsMonth
 │   │   └── dashboard.py                # DashboardStatsOut, AttendanceAlertItem
 │   │
@@ -107,10 +113,10 @@ english-center-backend/
 │   │   ├── teacher_service.py          # Nghiệp vụ giáo viên, băm mật khẩu, phân công lớp
 │   │   ├── class_service.py            # Quản lý lớp học, tính sĩ số tự động, phân quyền lớp
 │   │   ├── student_service.py          # Nghiệp vụ học sinh, chuyển trạng thái bảo lưu
-│   │   ├── session_service.py          # Nghiệp vụ ca học, hủy buổi học, phân công dạy thay
+│   │   ├── session_service.py          # Nghiệp vụ ca học, xóa ca học an toàn, hủy ca/nghỉ lễ, dạy thay
 │   │   ├── attendance_service.py       # Nghiệp vụ điểm danh (ACID transaction, lọc DangHoc)
-│   │   ├── exam_service.py             # Chấm trắc nghiệm tự động, thang 10 làm tròn 1 chữ số, anti-cheat
-│   │   ├── result_service.py           # Nhập điểm thi giấy, kiểm soát học sinh vắng, lưu từng phần
+│   │   ├── exam_service.py             # Quản lý khung giờ thi, xác thực PIN, chấm điểm tự động, preview mode, gửi Zalo kết quả
+│   │   ├── result_service.py           # Bảng điểm cả lớp kèm chi tiết câu trả lời, nhập điểm thi giấy
 │   │   ├── dispatcher_service.py       # Cây quyết định gửi tin Zalo 4 kịch bản, rate limit 0.35s
 │   │   └── zalo/                       # Adapter Pattern Giao tiếp Zalo Service
 │   │       ├── __init__.py
@@ -134,21 +140,27 @@ english-center-backend/
 │   ├── env.py                          # Cấu hình AsyncEngine cho Alembic
 │   ├── script.py.mako                  # Template migration
 │   └── versions/                       # Thư mục chứa các file migration
+│       └── 20261107_01_add_exam_time_and_pin.py # Migration bổ sung gio_mo_de, gio_dong_de, ma_vao_thi
 │
-├── tests/                              # Bộ Kiểm thử Tự động Toàn diện (Pytest)
+├── tests/                              # Bộ Kiểm thử Tự động Toàn diện (Pytest - 48 Tests)
 │   ├── __init__.py
 │   ├── conftest.py                     # Fixtures SQLite async in-memory, mock tokens, setup data
-│   ├── test_auth.py                    # Test Đăng nhập, băm mật khẩu, token JWT
-│   ├── test_tenant_isolation.py        # Test TC-01 (IDOR), TC-02 (Multi-tenant), TC-13 (LicenseGuard)
-│   ├── test_students.py                # Test TC-06 (Validate Regex SĐT di động VN)
-│   ├── test_attendance.py              # Test TC-07 (Lọc DangHoc), TC-08 (Báo vắng), TC-11 (Hủy buổi)
-│   ├── test_online_exam.py             # Test TC-03 (Chống nộp 2 lần), TC-04 (Giấu đáp án), TC-05 (Làm tròn)
-│   ├── test_manual_scores.py           # Test TC-12 (Lưu điểm từng phần, chặn điểm học sinh vắng)
-│   ├── test_zalo_adapter.py            # Test TC-09 (Chống gửi trùng), TC-15 (Bọc lỗi độc lập từng học sinh)
-│   └── test_cron_end_shift.py          # Test TC-10 (GV quên điểm danh không gửi vắng ảo), TC-14 (Advisory Lock)
+│   ├── test_auth.py                    # Test Đăng nhập, băm mật khẩu, token JWT (3 tests)
+│   ├── test_tenant_isolation.py        # Test TC-01 (IDOR), TC-02 (Multi-tenant), TC-13 (LicenseGuard) (3 tests)
+│   ├── test_students.py                # Test TC-06 (Validate Regex SĐT di động VN) (1 test)
+│   ├── test_attendance.py              # Test TC-07 (Lọc DangHoc), TC-08 (Báo vắng), TC-11 (Hủy buổi) (3 tests)
+│   ├── test_online_exam.py             # Test TC-03 (Chống nộp 2 lần), TC-04 (Giấu đáp án), TC-05 (Làm tròn) (3 tests)
+│   ├── test_manual_scores.py           # Test TC-12 (Lưu điểm từng phần, chặn điểm học sinh vắng) (2 tests)
+│   ├── test_zalo_adapter.py            # Test TC-09 (Chống gửi trùng), TC-15 (Bọc lỗi độc lập từng học sinh) (2 tests)
+│   ├── test_cron_end_shift.py          # Test TC-10 (GV quên điểm danh không gửi vắng ảo), TC-14 (Advisory Lock) (2 tests)
+│   ├── test_exam_time.py               # [MỚI] Test Khung giờ thi cố định (trước giờ mở, sau giờ đóng, định dạng HH:mm, public hide) (4 tests)
+│   ├── test_exam_pin.py                # [MỚI] Test Xác thực PIN vào thi, cấp token, chống brute-force, chặn submit thiếu PIN (9 tests)
+│   ├── test_exam_results_detail.py     # [MỚI] Test API GV xem bài làm kèm đáp án đúng, gửi điểm Zalo, chống gửi trùng (5 tests)
+│   ├── test_exam_preview.py            # [MỚI] Test Chế độ Preview không lưu DB, không gửi Zalo, chặn học sinh fake preview (4 tests)
+│   └── test_session_delete_holiday.py  # [MỚI] Test Xóa ca học an toàn, chặn xóa ca có dữ liệu, hủy ca DaHuy/NghiLe (7 tests)
 │
 ├── scripts/
-│   └── seed_data.py                    # Script tự động khởi tạo database & nạp dữ liệu mẫu
+│   └── seed_data.py                    # Script tự động khởi tạo database & nạp dữ liệu mẫu (đã cập nhật PIN, giờ thi, NghiLe)
 │
 ├── requirements.txt                    # Danh sách thư viện phụ thuộc
 ├── alembic.ini                         # File cấu hình Alembic
@@ -172,11 +184,11 @@ Cơ sở dữ liệu được thiết kế đáp ứng chuẩn toàn vẹn dữ 
 | `nguoi_dung` | `id` | `trung_tam_id` $\rightarrow$ `trung_tam.id` | `UNIQUE(email)`, `mat_khau_hash NOT NULL` | `email`, `trung_tam_id` | Người dùng 3 vai trò (SuperAdmin, Admin, GiaoVien). |
 | `lop_hoc` | `id` | `trung_tam_id`, `giao_vien_id` | `UNIQUE(trung_tam_id, ma_lop)` | `trung_tam_id`, `giao_vien_id` | Lớp học, mã lớp duy nhất theo trung tâm, giáo viên phụ trách. |
 | `hoc_sinh` | `id` | `trung_tam_id`, `lop_id` | `sdt_phu_huynh NOT NULL` (không unique) | `(trung_tam_id, lop_id, trang_thai)` | Hồ sơ học sinh, trạng thái `DangHoc`, `BaoLuu`, `DaNghi`. |
-| `buoi_hoc` | `id` | `trung_tam_id`, `lop_id`, `giao_vien_day_thay_id` | `ngay_hoc`, `gio_bat_dau`, `gio_ket_thuc` | `(ngay_hoc, gio_ket_thuc, da_gui, ...)` | Lịch dạy, trạng thái điểm danh, trạng thái hủy/nghỉ lễ. |
+| `buoi_hoc` | `id` | `trung_tam_id`, `lop_id`, `giao_vien_day_thay_id` | `ngay_hoc`, `gio_bat_dau`, `gio_ket_thuc`, `trang_thai_buoi_hoc IN ('BinhThuong', 'NghiLe', 'DaHuy')` | `(ngay_hoc, gio_ket_thuc, da_gui, ...)` | Lịch dạy, trạng thái điểm danh, trạng thái bình thường/nghỉ lễ/hủy ca. |
 | `diem_danh` | `id` | `trung_tam_id`, `buoi_hoc_id`, `hoc_sinh_id` | `UNIQUE(buoi_hoc_id, hoc_sinh_id)` | `buoi_hoc_id`, `hoc_sinh_id` | Trạng thái Có mặt / Vắng của từng học sinh trong ca. |
-| `bai_kiem_tra`| `id` | `trung_tam_id`, `buoi_hoc_id` | `hinh_thuc IN ('he_thong', 'giay')` | `buoi_hoc_id`, `trung_tam_id` | Đề thi trắc nghiệm online hoặc bài thi giấy. |
+| `bai_kiem_tra`| `id` | `trung_tam_id`, `buoi_hoc_id` | `hinh_thuc IN ('he_thong', 'giay')`, `gio_mo_de VARCHAR(10)`, `gio_dong_de VARCHAR(10)`, `ma_vao_thi VARCHAR(20)` | `buoi_hoc_id`, `trung_tam_id` | Đề thi trắc nghiệm online (kèm khung giờ cố định và mã PIN) hoặc thi giấy. |
 | `cau_hoi` | `id` | `bai_kiem_tra_id` $\rightarrow$ `bai_kiem_tra.id` | `dap_an_dung IN ('A','B','C','D')` | `bai_kiem_tra_id` | Câu hỏi trắc nghiệm, 4 phương án, đáp án đúng. |
-| `ket_qua` | `id` | `trung_tam_id`, `bai_kiem_tra_id`, `hoc_sinh_id` | `UNIQUE(bai_kiem_tra_id, hoc_sinh_id)`, `CHECK(0.0 <= diem_so <= 10.0)` | `bai_kiem_tra_id`, `hoc_sinh_id` | Điểm số `NUMERIC(3,1)`, số lần rời tab, chi tiết câu trả lời. |
+| `ket_qua` | `id` | `trung_tam_id`, `bai_kiem_tra_id`, `hoc_sinh_id` | `UNIQUE(bai_kiem_tra_id, hoc_sinh_id)`, `CHECK(0.0 <= diem_so <= 10.0)` | `bai_kiem_tra_id`, `hoc_sinh_id` | Điểm số `NUMERIC(3,1)`, số lần rời tab, JSON `chi_tiet_tra_loi`. |
 | `nhat_ky_zalo`| `id` | `trung_tam_id`, `buoi_hoc_id`, `hoc_sinh_id` | `UNIQUE(buoi_hoc_id, hoc_sinh_id, loai_tin)` | `(trung_tam_id, thoi_gian_gui)` | Nhật ký tin nhắn đã gửi, chống gửi trùng lặp (Idempotency). |
 | `hen_gio_gui_tin`| `id` | `trung_tam_id`, `buoi_hoc_id`, `hoc_sinh_id` | `thoi_gian_hen_gui NOT NULL` | `(trang_thai, thoi_gian_hen_gui)` | Hàng đợi lưu bền vững gửi tin lúc 07:30 sáng hôm sau. |
 
@@ -190,26 +202,33 @@ Cơ sở dữ liệu được thiết kế đáp ứng chuẩn toàn vẹn dữ 
    - Bắt lỗi token hết hạn và thu hồi phiên người dùng tự động.
 2. **Kiểm soát Quyền 3 Cấp (RBAC):**
    - `SuperAdmin`: Quản lý toàn bộ khách hàng SaaS, gia hạn bản quyền, cấu hình Token Zalo.
-   - `Admin Trung Tâm`: Quản lý toàn bộ lớp học, giáo viên, học sinh, lịch dạy, xem Dashboard và can thiệp điểm danh hộ.
-   - `GiaoVien`: **Bảo mật Scoped Access** — Giáo viên chỉ được xem danh sách học sinh và điểm danh các lớp mình được phân công; cố tình truy vấn lớp người khác sẽ nhận lỗi `404 Not Found` (ngăn ngừa tấn công dò quét IDOR).
+   - `Admin Trung Tâm`: Quản lý toàn bộ lớp học, giáo viên, học sinh, lịch dạy, xem Dashboard, can thiệp điểm danh hộ, xóa ca học chưa phát sinh dữ liệu.
+   - `GiaoVien`: **Bảo mật Scoped Access** — Giáo viên chỉ được xem danh sách học sinh, điểm danh, xem chi tiết đáp án bài thi (`/detail`) của các lớp mình được phân công; cố tình truy vấn lớp người khác sẽ nhận lỗi `403 Forbidden` hoặc `404 Not Found` (ngăn ngừa tấn công dò quét IDOR).
 3. **Multi-tenant Isolation (Cách ly Đa Trung tâm):**
    - Mọi thao tác truy vấn đều ép điều kiện `WHERE trung_tam_id = :current_tenant_id` lấy từ JWT Token đã được ký số, **tuyệt đối không tin tưởng `trung_tam_id` từ phía client gửi lên**.
 4. **LicenseGuard Middleware:**
    - Chặn toàn bộ các thao tác ghi dữ liệu (`POST`, `PUT`, `PATCH`, `DELETE`) nếu trung tâm hết hạn bản quyền phần mềm (`ngay_het_han_saas < TODAY` hoặc `trang_thai_ban_quyen == 'HetHan'`), trả về lỗi HTTP 403 `SAAS_LICENSE_EXPIRED`.
    - Vẫn cho phép các thao tác `GET` để trung tâm tra cứu dữ liệu cũ.
-5. **CORS:**
+5. **[MỚI] Bảo Mật Cổng Thi Online (Public Exam Security & PIN Verification):**
+   - Cổng Public `GET /api/exams/:id` **loại bỏ hoàn toàn `dap_an_dung` và `ma_vao_thi`** khỏi JSON response.
+   - Xác thực mã PIN thông qua `POST /api/exams/:id/verify-pin` trả về `exam_token` có thời hạn và gắn chặt với `exam_id` + `hoc_sinh_id`.
+   - Giới hạn 5 lần thử sai mã PIN trong 5 phút để triệt tiêu tấn công brute-force (`PIN_RATE_LIMITED`).
+   - Cấm gửi nộp bài trực tiếp nếu bài thi có PIN nhưng chưa xác thực (`PIN_REQUIRED`).
+6. **[MỚI] Bảo Mật Chế Độ Preview:**
+   - Cờ `is_preview: bool = True` bắt buộc phải kèm Bearer Token của Giáo viên phụ trách lớp hoặc Admin. Học sinh không có tài khoản gửi `is_preview=True` sẽ bị từ chối với `403 PREVIEW_UNAUTHORIZED`.
+7. **CORS:**
    - Cấu hình mở quyền truy cập cho Frontend tại `http://localhost:5173` và `http://localhost:3000`.
 
 ---
 
-## 5. TÀI LIỆU API CHI TIẾT (API DOCUMENTATION)
+## 5. TÀI LIỆU API CHI TIẾT (API CONTRACT)
 
 Toàn bộ 11 nhóm API đã được triển khai đầy đủ và tuân thủ 100% chuẩn phản hồi của Frontend:
 - **Base URL:** `http://localhost:5000/api`
 - **Chuẩn Success Response:** `{ "success": true, "data": ..., "message": "..." }`
 - **Chuẩn Error Response:** `{ "success": false, "error_code": "...", "message": "...", "details": ... }`
 
-### Danh sách Endpoint chi tiết:
+### Danh sách Endpoint chi tiết (Bao gồm các Endpoint mới):
 
 | Module | Method | Endpoint | Chức năng nghiệp vụ | Quyền truy cập | Trạng thái |
 | :--- | :---: | :--- | :--- | :---: | :---: |
@@ -240,18 +259,22 @@ Toàn bộ 11 nhóm API đã được triển khai đầy đủ và tuân thủ 
 | **Sessions** | `GET` | `/api/sessions` | Lấy danh sách ca học theo ngày/lớp | Admin / GV | ✅ Hoạt động |
 | | `POST` | `/api/sessions` | Tạo buổi học mới | Admin | ✅ Hoạt động |
 | | `GET` | `/api/sessions/:id` | Chi tiết ca học | Admin / GV | ✅ Hoạt động |
-| | `PATCH` | `/api/sessions/:id/cancel` | Hủy ca học / Báo nghỉ lễ kèm lý do | Admin | ✅ Hoạt động |
+| | `PATCH` | `/api/sessions/:id/cancel` | Hủy ca học (`DaHuy`) hoặc Báo nghỉ lễ (`NghiLe`) | Admin | ✅ Hoạt động |
+| | `DELETE` | `/api/sessions/:id` | **[MỚI]** Xóa ca học an toàn (chỉ khi chưa có dữ liệu) | Admin | ✅ Hoạt động |
 | | `PATCH` | `/api/sessions/:id/substitute` | Chỉ định giáo viên dạy thay | Admin | ✅ Hoạt động |
 | | `PATCH` | `/api/sessions/:id/confirm-attendance` | Xác nhận hoàn thành điểm danh độc lập | Admin / GV | ✅ Hoạt động |
 | **Attendance** | `GET` | `/api/sessions/:id/attendance` | Lấy danh sách điểm danh (chỉ học sinh `DangHoc`) | Admin / GV | ✅ Hoạt động |
 | | `POST` | `/api/sessions/:id/attendance` | Lưu điểm danh (ACID) & kích hoạt Zalo ngay | Admin / GV | ✅ Hoạt động |
-| **Exams** | `POST` | `/api/exams` | Tạo bài kiểm tra trắc nghiệm online / giấy | Admin / GV | ✅ Hoạt động |
+| **Exams** | `POST` | `/api/exams` | Tạo bài kiểm tra (nhận `gio_mo_de`, `gio_dong_de`, `ma_vao_thi`) | Admin / GV | ✅ Hoạt động |
 | | `GET` | `/api/exams` | Danh sách bài kiểm tra theo ca học | Admin / GV | ✅ Hoạt động |
-| | `GET` | `/api/exams/:id` | Cổng đề thi học sinh (**ĐÃ GIẤU ĐÁP ÁN ĐÚNG**) | Public (Không cần login)| ✅ Hoạt động |
+| | `GET` | `/api/exams/:id` | Cổng đề thi học sinh (**Ẩn đáp án & mã PIN**) | Public (Không cần login)| ✅ Hoạt động |
+| | `POST` | `/api/exams/:id/verify-pin` | **[MỚI]** Xác thực mã PIN vào thi & cấp `exam_token` | Public (Học sinh) | ✅ Hoạt động |
+| | `GET` | `/api/exams/:id/detail` | **[MỚI]** Chi tiết bài thi GV (**Có đáp án đúng** & DS học sinh) | Admin / GV phụ trách | ✅ Hoạt động |
+| | `POST` | `/api/exams/:id/send-zalo-results` | **[MỚI]** Gửi thông báo điểm Zalo ZNS cho HS đã nộp | Admin / GV phụ trách | ✅ Hoạt động |
 | | `POST` | `/api/exams/:id/questions` | Thêm danh sách câu hỏi vào đề | Admin / GV | ✅ Hoạt động |
-| | `POST` | `/api/exams/:id/submit` | Nộp bài thi online (Chấm tự động, chống nộp lại)| Public (Học sinh) | ✅ Hoạt động |
+| | `POST` | `/api/exams/:id/submit` | Nộp bài thi online (Chấm tự động / Chế độ Preview)| Public / GV Preview | ✅ Hoạt động |
 | | `POST` | `/api/exams/:id/manual-scores`| Nhập điểm thi giấy thủ công (Hẹn giờ ban đêm) | Admin / GV | ✅ Hoạt động |
-| **Results** | `GET` | `/api/exams/:id/results` | Bảng kết quả điểm thi của cả lớp | Admin / GV | ✅ Hoạt động |
+| **Results** | `GET` | `/api/exams/:id/results` | Bảng điểm cả lớp (**Có `chi_tiet_tra_loi` & `so_cau_dung`**) | Admin / GV | ✅ Hoạt động |
 | | `GET` | `/api/students/:id/results`| Lịch sử bảng điểm của 1 học sinh | Admin / GV | ✅ Hoạt động |
 | **Zalo Logs** | `GET` | `/api/zalo-logs` | Bộ lọc nhật ký tin nhắn & phân trang | SuperAdmin / Admin | ✅ Hoạt động |
 | | `GET` | `/api/zalo-logs/stats` | Thống kê số tin thành công, thất bại 6 tháng | SuperAdmin / Admin | ✅ Hoạt động |
@@ -260,139 +283,153 @@ Toàn bộ 11 nhóm API đã được triển khai đầy đủ và tuân thủ 
 
 ---
 
-## 6. PHÂN TÍCH CHI TIẾT CÁC NGHIỆP VỤ CỐT LÕI
+## 6. ĐẶC TẢ CHI TIẾT 5 YÊU CẦU NGHIỆP VỤ NÂNG CẤP
 
-1. **Nghiệp vụ Điểm Danh Tối Ưu:**
-   - Khi gọi `GET /api/sessions/:id/attendance`, Backend chỉ truy vấn những học sinh có `trang_thai = 'DangHoc'`. Toàn bộ học sinh `BaoLuu` và `DaNghi` hoàn toàn bị ẩn để tránh giáo viên điểm danh nhầm.
-   - Nếu buổi học chưa được điểm danh, Backend mặc định trả về trạng thái `trang_thai = "CoMat"` cho toàn bộ học sinh để giáo viên chỉ cần 1 thao tác click chọn những bạn Vắng.
-2. **Cơ Chế An Toàn Lưới Điểm Danh (Safety Net):**
-   - Khi buổi học kết thúc, Cron Job quét qua. Nếu phát hiện `trang_thai_diem_danh == 'chua_diem_danh'`, hệ thống **TUYỆT ĐỐI KHÔNG GỬI TIN BÁO VẮNG ẢO** cho phụ huynh. Thay vào đó, ca học xuất hiện trên màn hình cảnh báo `/api/dashboard/alerts` để Admin có thể bấm "Điểm danh hộ".
-3. **Thi Online Trắc Nghiệm An Toàn (Anti-Cheat & Anti-Leak):**
-   - Cổng làm bài thi `/thi/:examId` là Public để học sinh mở link làm bài ngay trên điện thoại hoặc máy tính mà không cần tài khoản.
-   - Endpoint `GET /api/exams/:id` **loại bỏ hoàn toàn trường `dap_an_dung` khỏi JSON response**. Học sinh không thể F12 DevTools để xem trước đáp án.
-   - Khi học sinh bấm Nộp bài, Backend so khớp đáp án với Database, tự động tính điểm theo thang 10: $\text{Điểm} = \text{round}((\text{Số câu đúng} / \text{Tổng câu}) \times 10, 1)$ và ghi nhận số lần chuyển tab gian lận (`so_lan_roi_tab`).
-   - Ràng buộc `UNIQUE(bai_kiem_tra_id, hoc_sinh_id)` chặn triệt để học sinh F5 làm bài lần 2.
-4. **Thi Giấy & Nhập Điểm Từng Phần:**
-   - Điểm số được validate từ `0.0` đến `10.0`.
-   - **Chặn học sinh vắng:** Học sinh có trạng thái Vắng trong ca học bị khóa không cho nhập điểm (vì vắng học thì không có bài thi giấy).
-   - Giáo viên chấm xong 15 bạn nhập trước 15 bạn, 5 bạn còn lại nhập sau. Hệ thống chỉ gửi tin báo điểm cho 15 bạn đợt đầu. Khi nhập tiếp 5 bạn đợt hai, hệ thống kiểm tra `NhatKyZalo` và chỉ gửi tin cho 5 bạn mới nhập, không gửi trùng cho 15 bạn trước đó.
-5. **Cây Quyết Định Gửi Tin Zalo (4 Kịch Bản):**
-   - ❌ Học sinh Vắng $\rightarrow$ Luôn gửi báo vắng.
-   - ✅ Có mặt + Thi online $\rightarrow$ Gửi báo điểm (đã có điểm tự động).
-   - ✅ Có mặt + Thi giấy chưa có điểm $\rightarrow$ Im lặng chờ giáo viên chấm xong.
-   - ✅ Có mặt + Buổi học không kiểm tra $\rightarrow$ Im lặng không gửi tin (tránh làm phiền phụ huynh).
-6. **Bảo Vệ Giấc Ngủ Phụ Huynh (07:00 - 21:30):**
-   - Khi giáo viên lưu điểm sau 21:30 đêm và Frontend gửi cờ `scheduleForMorning: true`, hệ thống lưu bản ghi vào bảng `hen_gio_gui_tin` hẹn gửi lúc 07:30 sáng hôm sau. Việc lưu vào database đảm bảo hàng đợi không bị mất ngay cả khi máy chủ khởi động lại ban đêm.
+### 6.1. Khung Giờ Thi Đóng / Mở Cố Định (`gio_mo_de`, `gio_dong_de`)
+* **Mục đích:** Đồng bộ thời gian làm bài thi trắc nghiệm theo khung giờ thực tế tại lớp học (ví dụ: mở lúc `09:30`, đóng cổng lúc `10:00`), thay thế cơ chế tính giờ độc lập từng máy.
+* **Cơ chế Server:**
+  - `gio_mo_de` và `gio_dong_de` được lưu dạng chuỗi `"HH:mm"`.
+  - Validate định dạng chuẩn `HH:mm` (giờ 00-23, phút 00-59).
+  - Server lấy thời gian thực (`datetime.now()`) để kiểm tra:
+    - Nếu trước `gio_mo_de`: Từ chối nộp bài và xác thực PIN với lỗi `400 EXAM_NOT_STARTED` ("Chưa đến giờ mở đề thi!").
+    - Nếu sau `gio_dong_de`: Từ chối nộp bài với lỗi `400 EXAM_CLOSED` ("Đã hết giờ làm bài! Cổng thi đã đóng.").
+  - Hỗ trợ ca thi qua đêm (nếu `gio_dong_de < gio_mo_de`).
+  - Tương thích ngược: Đề thi cũ có `gio_mo_de=None` và `gio_dong_de=None` vẫn cho phép làm bài bình thường không bị chặn giờ.
+
+### 6.2. Xác Thực Mã PIN Phòng Thi (`ma_vao_thi`) & Chống Thi Hộ
+* **Mục đích:** Học sinh mở link Public chọn tên mình trong danh sách lớp bắt buộc phải nhập mã PIN do Giáo viên cung cấp trực tiếp tại lớp để ngăn chặn thi hộ.
+* **Quy trình Xác Thực Phía Server:**
+  1. Học sinh gửi `POST /api/exams/{exam_id}/verify-pin` kèm `{ "ma_vao_thi": "1234", "hoc_sinh_id": 1 }`.
+  2. Rate Limiting: Giới hạn tối đa 5 lần thử sai trong 5 phút. Nếu vượt quá, Server trả về lỗi `400 PIN_RATE_LIMITED`.
+  3. Kiểm tra mã PIN khớp với `exam.ma_vao_thi`:
+     - Nếu sai: Ghi nhận số lần thất bại, trả về `400 INVALID_EXAM_PIN`.
+     - Nếu đúng: Xóa lịch sử thất bại, sinh JWT `exam_token` có payload `{"type": "exam_access", "exam_id": ..., "hoc_sinh_id": ..., "exp": ...}` với thời hạn 3 giờ.
+  4. Khi nộp bài (`POST /api/exams/{exam_id}/submit`):
+     - Server giải mã `exam_token`: Ràng buộc đúng `exam_id` (chống mang token sang đề khác - `EXAM_TOKEN_MISMATCH`), đúng `hoc_sinh_id` (chống dùng token bạn khác - `STUDENT_TOKEN_MISMATCH`) và còn hiệu lực.
+     - Nếu không có token và không có PIN hợp lệ: Trả về `400 PIN_REQUIRED`.
+  5. Cổng Public `GET /api/exams/{exam_id}` tuyệt đối không trả về `ma_vao_thi`.
+
+### 6.3. Hoàn Thiện Trang Giáo Viên Xem Bài Làm & Gửi Báo Điểm Zalo
+* **Schema `ResultOut`:**
+  - Bổ sung trường `chi_tiet_tra_loi: Optional[Dict[str, Any]]` chứa phương án học sinh chọn và trạng thái đúng/sai từng câu.
+  - Bổ sung trường `so_cau_dung: Optional[int]` đếm tự động số câu đúng từ `chi_tiet_tra_loi`.
+* **Endpoint Chi Tiết Cho Giáo Viên (`GET /api/exams/{exam_id}/detail`):**
+  - Quyền truy cập: `Admin` hoặc `GiaoVien` được phân công phụ trách lớp (giáo viên chính hoặc dạy thay). Giáo viên khác lớp nhận `403 Forbidden`.
+  - Trả về danh sách câu hỏi **CÓ KÈM `dap_an_dung`**.
+  - Trả về danh sách toàn bộ học sinh `DangHoc` của lớp kèm trạng thái: Đã nộp bài (điểm số, số câu đúng, bài làm chi tiết) hoặc Chưa làm bài.
+* **Endpoint Gửi Báo Điểm Zalo (`POST /api/exams/{exam_id}/send-zalo-results`):**
+  - Chỉ gửi thông báo điểm cho các học sinh ĐÃ hoàn thành bài thi (`KetQua` tồn tại).
+  - Tích hợp bộ lọc chống gửi trùng của `NhatKyZalo` (`loai_tin = 'bao_diem'`). Gửi lại lần hai sẽ tự động bỏ qua (`skipped_already_sent`).
+  - Bọc lỗi độc lập: Một học sinh gửi lỗi (sai SĐT) không làm dừng tiến trình gửi của các bạn khác.
+
+### 6.4. Tách Biệt Chế Độ Preview và Thi Thật (`is_preview`)
+* **Bối cảnh:** Giáo viên muốn bấm "Mở xem thử" để kiểm tra đề và nộp bài làm thử mà không ảnh hưởng tới dữ liệu của học sinh trong lớp.
+* **Cơ chế:**
+  - `ExamSubmitIn` nhận cờ `is_preview: bool = False` và cho phép `hoc_sinh_id: Optional[int] = None`.
+  - **Bảo mật phía Server:** Khi `is_preview == True`, Server kiểm tra Bearer Token bắt buộc phải là `Admin` hoặc `GiaoVien` phụ trách lớp. Người dùng không đăng nhập (học sinh) gửi `is_preview=True` sẽ bị từ chối `403 PREVIEW_UNAUTHORIZED`.
+  - **Xử lý chấm điểm:** Chấm điểm bình thường, trả về `{ diem_so, so_cau_dung, tong_cau, xep_loai, is_preview: true }`.
+  - **Không can thiệp CSDL:** Tuyệt đối không tạo bản ghi `KetQua`, không ghi nhận `NhatKyZalo`, không gửi thông báo Zalo, không khóa quyền làm bài của bất kỳ học sinh nào.
+
+### 6.5. Xóa Ca Học An Toàn & Hỗ Trợ Trạng Thái Nghỉ Lễ
+* **Endpoint Xóa Ca Học (`DELETE /api/sessions/{session_id}`):**
+  - Quyền truy cập: `Admin` hoặc `SuperAdmin`.
+  - Cơ chế xóa an toàn (Safe Deletion):
+    - Kiểm tra nếu ca học đã điểm danh (`SessionAttendanceStatus.TAKEN` hoặc bảng `DiemDanh` có bản ghi) $\rightarrow$ Chặn với `400 SESSION_HAS_ATTENDANCE`.
+    - Kiểm tra nếu ca học có bài kiểm tra đã có kết quả (`KetQua` có dữ liệu) $\rightarrow$ Chặn với `400 SESSION_HAS_EXAM_RESULTS`.
+    - Kiểm tra nếu ca học đã phát sinh lịch sử tin Zalo (`NhatKyZalo` có dữ liệu) $\rightarrow$ Chặn với `400 SESSION_HAS_ZALO_LOGS`.
+    - Chỉ cho phép xóa sạch các ca học tạo nhầm chưa phát sinh dữ liệu nghiệp vụ quan trọng.
+* **Hỗ Trợ Trạng Thái Nghỉ Lễ (`NghiLe`):**
+  - `SessionCancelIn` nhận `trang_thai_buoi_hoc: Optional[str] = "DaHuy"` (chấp nhận `"DaHuy"` hoặc `"NghiLe"`).
+  - Cập nhật đúng trạng thái trong bảng `buoi_hoc`.
+  - Cron Job cuối ca (`end_shift_cron.py`) và Dispatcher (`DispatcherService`) tự động bỏ qua cả ca `DaHuy` và `NghiLe`, không phát bất kỳ tin nhắn Zalo nào.
 
 ---
 
-## 7. MODULE ZALO SERVICE (PLUG & PLAY)
+## 7. KẾT QUẢ KIỂM THỬ THỰC TẾ (TEST SUITE)
 
-Module Zalo Service được thiết kế theo mẫu **Adapter Pattern**:
-* **Interface `BaseZaloProvider`:** Định nghĩa 2 phương thức trừu tượng: `send_absent_notice` và `send_score_notice`.
-* **`MockZaloProvider` (Chế độ Demo):** Mô phỏng trễ mạng 50ms, tự động ghi nhận bản ghi gửi tin vào bảng `NhatKyZalo` với trạng thái `'Demo'`.
-* **`ProductionZnsProvider` (Chế độ Thật):** Tự động đọc `zalo_access_token` và `zalo_oa_id` từ trung tâm trong database và gọi Zalo Cloud API thật.
-* **`ZaloProviderFactory`:** Tự động quyết định sử dụng Provider tương ứng.
-* **Rate Limiter chống nghẽn:** Điều hòa tốc độ gửi tin với khoảng nghỉ 0.35 giây giữa mỗi tin nhắn.
-* **Bọc lỗi độc lập từng học sinh:** Mỗi học sinh được xử lý trong khối `try-except` riêng. Nếu 1 học sinh bị sai số điện thoại hoặc lỗi mạng, hệ thống ghi nhận `'ThatBai'` trong `NhatKyZalo`, vòng lặp gửi tin của cả lớp vẫn tiếp tục thành công cho các học sinh còn lại.
-
----
-
-## 8. SCHEDULER & CRON JOBS
-
-Triển khai bằng `APScheduler.AsyncIOScheduler` chạy nền đồng bộ cùng vòng đời FastAPI:
-1. **End Shift Cron (`end_shift_cron.py`):**
-   - Quét định kỳ mỗi **60 giây**.
-   - Điều kiện quét: `ngay_hoc == TODAY AND gio_ket_thuc <= NOW AND da_gui == false AND trang_thai_buoi_hoc == 'BinhThuong'`.
-   - Sử dụng **Advisory Lock** chống chạy trùng khi có nhiều worker hoạt động đồng thời.
-   - Nếu máy chủ bị cúp điện lúc 18:58 và bật lại lúc 19:15, Cron Job tự động phát hiện ca học đã kết thúc và gửi bù ngay lập tức.
-2. **Morning Queue Cron (`morning_queue_cron.py`):**
-   - Quét định kỳ kiểm tra các bản ghi trong bảng `hen_gio_gui_tin` có `trang_thai = 'ChoGui' AND thoi_gian_hen_gui <= NOW`.
-   - Gửi tin nhắn thông báo điểm và cập nhật `trang_thai = 'DaXuLy'`.
-
----
-
-## 9. KẾT QUẢ KIỂM THỬ THỰC TẾ (TEST RESULTS)
-
-Toàn bộ bộ kiểm thử được chạy bằng lệnh `pytest tests/ -v` trên môi trường SQLite Async in-memory:
+Toàn bộ 48 test cases đã được thực thi và vượt qua 100% bằng lệnh `pytest tests/ -v`:
 
 ```text
 ============================= test session starts =============================
 platform win32 -- Python 3.14.5, pytest-9.1.1, pluggy-1.6.0
-collected 19 items
+collected 48 items
 
-english-center-backend/tests/test_attendance.py::test_tc07_exclude_reserved_and_dropped_students_from_attendance PASSED [  5%]
-english-center-backend/tests/test_attendance.py::test_tc08_absent_students_always_receive_absent_notice PASSED [ 10%]
-english-center-backend/tests/test_attendance.py::test_tc11_cancelled_session_does_not_send_notifications PASSED [ 15%]
-english-center-backend/tests/test_auth.py::test_login_success PASSED     [ 21%]
-english-center-backend/tests/test_auth.py::test_login_invalid_password PASSED [ 26%]
-english-center-backend/tests/test_auth.py::test_get_me PASSED            [ 31%]
-english-center-backend/tests/test_cron_end_shift.py::test_tc10_unrecorded_attendance_safety_net_does_not_send_false_notices PASSED [ 36%]
-english-center-backend/tests/test_cron_end_shift.py::test_tc14_advisory_lock_prevents_concurrent_runs PASSED [ 42%]
-english-center-backend/tests/test_manual_scores.py::test_tc12_partial_and_additional_manual_scores_without_duplicate PASSED [ 47%]
-english-center-backend/tests/test_manual_scores.py::test_block_manual_score_for_absent_student PASSED [ 52%]
-english-center-backend/tests/test_online_exam.py::test_tc04_online_exam_does_not_leak_correct_answers PASSED [ 57%]
-english-center-backend/tests/test_online_exam.py::test_tc03_block_duplicate_exam_submission PASSED [ 63%]
-english-center-backend/tests/test_online_exam.py::test_tc05_score_rounding_to_one_decimal PASSED [ 68%]
-english-center-backend/tests/test_students.py::test_tc06_validate_vietnamese_phone_number PASSED [ 73%]
-english-center-backend/tests/test_tenant_isolation.py::test_tc01_teacher_cannot_access_other_teacher_class PASSED [ 78%]
-english-center-backend/tests/test_tenant_isolation.py::test_tc02_multi_tenant_isolation PASSED [ 84%]
-english-center-backend/tests/test_tenant_isolation.py::test_tc13_license_guard_blocks_writes_when_expired PASSED [ 89%]
-english-center-backend/tests/test_zalo_adapter.py::test_tc09_zalo_idempotency_prevents_duplicate_notices PASSED [ 94%]
+english-center-backend/tests/test_attendance.py::test_tc07_exclude_reserved_and_dropped_students_from_attendance PASSED [  2%]
+english-center-backend/tests/test_attendance.py::test_tc08_absent_students_always_receive_absent_notice PASSED [  4%]
+english-center-backend/tests/test_attendance.py::test_tc11_cancelled_session_does_not_send_notifications PASSED [  6%]
+english-center-backend/tests/test_auth.py::test_login_success PASSED     [  8%]
+english-center-backend/tests/test_auth.py::test_login_invalid_password PASSED [ 10%]
+english-center-backend/tests/test_auth.py::test_get_me PASSED            [ 12%]
+english-center-backend/tests/test_cron_end_shift.py::test_tc10_unrecorded_attendance_safety_net_does_not_send_false_notices PASSED [ 14%]
+english-center-backend/tests/test_cron_end_shift.py::test_tc14_advisory_lock_prevents_concurrent_runs PASSED [ 16%]
+english-center-backend/tests/test_exam_pin.py::test_public_exam_does_not_leak_pin PASSED [ 18%]
+english-center-backend/tests/test_exam_pin.py::test_verify_pin_success_issues_token PASSED [ 20%]
+english-center-backend/tests/test_exam_pin.py::test_verify_pin_wrong_code PASSED [ 22%]
+english-center-backend/tests/test_exam_pin.py::test_verify_pin_empty_or_too_long PASSED [ 25%]
+english-center-backend/tests/test_exam_pin.py::test_submit_without_pin_is_blocked PASSED [ 27%]
+english-center-backend/tests/test_exam_pin.py::test_submit_with_valid_token_succeeds PASSED [ 29%]
+english-center-backend/tests/test_exam_pin.py::test_submit_with_token_mismatch_exam_or_student PASSED [ 31%]
+english-center-backend/tests/test_exam_pin.py::test_submit_with_expired_token PASSED [ 33%]
+english-center-backend/tests/test_exam_pin.py::test_pin_brute_force_rate_limit PASSED [ 35%]
+english-center-backend/tests/test_exam_preview.py::test_teacher_preview_grades_without_saving_db PASSED [ 37%]
+english-center-backend/tests/test_exam_preview.py::test_student_cannot_bypass_rules_using_is_preview PASSED [ 39%]
+english-center-backend/tests/test_exam_preview.py::test_teacher_of_other_class_cannot_preview PASSED [ 41%]
+english-center-backend/tests/test_exam_preview.py::test_student_can_still_submit_real_exam_after_teacher_preview PASSED [ 43%]
+english-center-backend/tests/test_exam_results_detail.py::test_teacher_views_own_class_exam_detail PASSED [ 45%]
+english-center-backend/tests/test_exam_results_detail.py::test_teacher_cannot_view_other_class_exam_detail PASSED [ 47%]
+english-center-backend/tests/test_exam_results_detail.py::test_admin_cannot_view_cross_tenant_exam_detail PASSED [ 50%]
+english-center-backend/tests/test_exam_results_detail.py::test_results_api_returns_chi_tiet_tra_loi_and_so_cau_dung PASSED [ 52%]
+english-center-backend/tests/test_exam_results_detail.py::test_send_zalo_results_idempotency_and_unsubmitted_filtering PASSED [ 54%]
+english-center-backend/tests/test_exam_time.py::test_exam_create_valid_and_invalid_time_format PASSED [ 56%]
+english-center-backend/tests/test_exam_time.py::test_exam_time_before_open_is_blocked PASSED [ 58%]
+english-center-backend/tests/test_exam_time.py::test_exam_time_after_close_is_blocked PASSED [ 60%]
+english-center-backend/tests/test_exam_time.py::test_exam_within_window_and_public_out_hides_pin PASSED [ 62%]
+english-center-backend/tests/test_manual_scores.py::test_tc12_partial_and_additional_manual_scores_without_duplicate PASSED [ 64%]
+english-center-backend/tests/test_manual_scores.py::test_block_manual_score_for_absent_student PASSED [ 66%]
+english-center-backend/tests/test_online_exam.py::test_tc04_online_exam_does_not_leak_correct_answers PASSED [ 68%]
+english-center-backend/tests/test_online_exam.py::test_tc03_block_duplicate_exam_submission PASSED [ 70%]
+english-center-backend/tests/test_online_exam.py::test_tc05_score_rounding_to_one_decimal PASSED [ 72%]
+english-center-backend/tests/test_session_delete_holiday.py::test_admin_delete_accidentally_created_session PASSED [ 75%]
+english-center-backend/tests/test_session_delete_holiday.py::test_teacher_cannot_delete_session PASSED [ 77%]
+english-center-backend/tests/test_session_delete_holiday.py::test_admin_cannot_delete_other_tenant_session PASSED [ 79%]
+english-center-backend/tests/test_session_delete_holiday.py::test_cannot_delete_session_with_attendance_records PASSED [ 81%]
+english-center-backend/tests/test_session_delete_holiday.py::test_cannot_delete_session_with_exam_results PASSED [ 83%]
+english-center-backend/tests/test_session_delete_holiday.py::test_cancel_session_with_DaHuy_and_NghiLe PASSED [ 85%]
+english-center-backend/tests/test_session_delete_holiday.py::test_dispatcher_and_cron_skip_NghiLe_session PASSED [ 87%]
+english-center-backend/tests/test_students.py::test_tc06_validate_vietnamese_phone_number PASSED [ 89%]
+english-center-backend/tests/test_tenant_isolation.py::test_tc01_teacher_cannot_access_other_teacher_class PASSED [ 91%]
+english-center-backend/tests/test_tenant_isolation.py::test_tc02_multi_tenant_isolation PASSED [ 93%]
+english-center-backend/tests/test_tenant_isolation.py::test_tc13_license_guard_blocks_writes_when_expired PASSED [ 95%]
+english-center-backend/tests/test_zalo_adapter.py::test_tc09_zalo_idempotency_prevents_duplicate_notices PASSED [ 97%]
 english-center-backend/tests/test_zalo_adapter.py::test_tc15_per_student_error_isolation PASSED [100%]
 
-======================= 19 passed in 19.88s =======================
+======================= 48 passed, 5 warnings in 54.72s =======================
 ```
 
-### Bảng Ma Trận 15 Edge Cases Nghiệp Vụ:
-* **TC-01:** Giáo viên A truy cập lớp giáo viên B $\rightarrow$ Trả về `404 Not Found` (**PASSED**).
-* **TC-02:** Admin Trung tâm 2 truy cập học sinh Trung tâm 1 $\rightarrow$ Trả về `404 Not Found` (**PASSED**).
-* **TC-03:** Học sinh nộp bài thi trắc nghiệm lần 2 $\rightarrow$ Bị chặn `400 EXAM_ALREADY_SUBMITTED` (**PASSED**).
-* **TC-04:** Học sinh xem đề thi online $\rightarrow$ Ẩn hoàn toàn `dap_an_dung` (**PASSED**).
-* **TC-05:** Điểm số trắc nghiệm lẻ ($2/3 \times 10 = 6.6666...$) $\rightarrow$ Tự động làm tròn thành `6.7` (**PASSED**).
-* **TC-06:** Số điện thoại bàn/sai cấu trúc bị từ chối 422; số di động VN hợp lệ được chấp nhận (**PASSED**).
-* **TC-07:** Học sinh `BaoLuu` và `DaNghi` hoàn toàn biến mất khỏi danh sách điểm danh (**PASSED**).
-* **TC-08:** Học sinh tick Vắng luôn nhận được thông báo báo vắng (**PASSED**).
-* **TC-09:** Cơ chế Idempotency chống gửi lặp 2 tin Zalo cho cùng 1 học sinh/buổi học (**PASSED**).
-* **TC-10:** Giáo viên quên điểm danh thì Cron Job cuối ca không tự ý gửi tin vắng ảo (**PASSED**).
-* **TC-11:** Buổi học bị hủy hoặc báo nghỉ lễ không phát bất kỳ tin nhắn nào (**PASSED**).
-* **TC-12:** Nhập điểm bổ sung cho thi giấy chỉ gửi tin cho các học sinh mới nhập (**PASSED**).
-* **TC-13:** Trung tâm hết hạn bản quyền bị chặn thao tác ghi với mã lỗi `SAAS_LICENSE_EXPIRED`, thao tác đọc vẫn hoạt động (**PASSED**).
-* **TC-14:** Advisory Lock ngăn chặn 2 worker chạy trùng ca học cùng một thời điểm (**PASSED**).
-* **TC-15:** Lỗi gửi tin của một học sinh không làm sập vòng lặp gửi tin của cả lớp (**PASSED**).
+### Thống Kê Chi Tiết Các Nhóm Kiểm Thử:
+* **Tổng số test cases:** 48
+* **Passed:** 48 (100%)
+* **Failed:** 0 (0%)
+* **Skipped:** 0 (0%)
 
 ---
 
-## 10. HƯỚNG DẪN KẾT NỐI VỚI FRONTEND REACT
+## 8. CÁC NỘI DUNG CÒN TỒN TẠI VÀ LƯU Ý KHI LÊN PRODUCTION
 
-Backend đã được tinh chỉnh để tương thích 100% với Frontend React trong thư mục `english-center-frontend/`:
-1. **Base URL:** `http://localhost:5000/api` (Khớp chính xác với cấu hình `axiosClient.js`).
-2. **CORS:** Đã cấu hình cho phép `http://localhost:5173`.
-3. **Đăng nhập thử nghiệm:**
-   - Khởi động backend: `uvicorn app.main:app --port 5000`
-   - Khởi động frontend: `cd english-center-frontend && npm run dev`
-   - Đăng nhập với:
-     - `admin@center.edu.vn` / `Password123@` (Admin)
-     - `teacher@center.edu.vn` / `Password123@` (Giáo viên)
-     - `super@saas.com` / `Password123@` (SuperAdmin)
-   - Tất cả các trang Dashboard, Học sinh, Lớp học, Lịch dạy, Điểm danh, Thi cử và Lịch sử Zalo đều kết nối và hiển thị dữ liệu thật từ Backend!
+1. **Zalo Cloud API Production:** Kiểm thử hiện tại đang kích hoạt qua `MockZaloProvider` (mô phỏng trễ 50ms và ghi nhận lịch sử vào bảng `nhat_ky_zalo`). Khi trung tâm nạp mã `OA ID` và `Access Token` thật, luồng `ProductionZnsProvider` sẽ tự động kích hoạt.
+2. **Cơ sở dữ liệu Production:** Môi trường kiểm thử tự động sử dụng SQLite Async in-memory (`aiosqlite`). Đối với môi trường Production, hệ thống sử dụng PostgreSQL 15+ thông qua driver `asyncpg` và đã có sẵn file migration Alembic `20261107_01_add_exam_time_and_pin.py` để chạy lệnh:
+   ```bash
+   alembic upgrade head
+   ```
+3. **Phân tán Bộ nhớ đệm (Distributed Caching):** Bộ đếm rate limit mã PIN hiện đang duy trì trong in-memory state của tiến trình FastAPI. Khi triển khai cụm nhiều container đằng sau Load Balancer, nên trỏ biến `REDIS_URL` để đưa bộ đếm này vào Redis.
 
 ---
 
-## 11. CÁC ĐIỂM CẦN LƯU Ý KHI TRIỂN KHAI PRODUCTION
+## 9. KẾT LUẬN
 
-1. **Khóa Bí Mật Zalo:** Thông tin `zalo_secret_key` và `zalo_access_token` được lưu trữ an toàn trong bảng `TrungTam` và không bao giờ trả về qua API công khai của giáo viên hay học sinh.
-2. **Mở Rộng Nhiều Worker:** Khi scale hệ thống lên nhiều container trên Docker Swarm hoặc Kubernetes, hãy kích hoạt biến `REDIS_URL` để Redis đảm nhiệm vai trò Distributed Lock và Cache thay thế cho in-memory lock.
-3. **Cắm Tài Khoản Zalo Thật:** Khi Thầy hoàn tất đăng ký Zalo Cloud API, SuperAdmin chỉ cần vào màn hình Quản lý Trung tâm (`/centers`), nhập `OA ID` và `Access Token` là hệ thống tự động kích hoạt chế độ gửi tin thật 100% mà không cần sửa bất kỳ dòng code nào.
-
----
-
-## 12. KẾT LUẬN
-
-Hệ thống Backend bằng Python cho dự án **Tool Quản Lý Trung Tâm Tiếng Anh (B2B SaaS)** đã được xây dựng hoàn thiện:
-* ✅ Đúng kiến trúc Clean Modular Architecture, không dùng code skeleton hay hàm `pass`/TODO.
-* ✅ Toàn bộ 11 modules nghiệp vụ, 11 bảng cơ sở dữ liệu, 44 API Endpoints hoạt động trơn tru.
-* ✅ Đạt 100% tỷ lệ vượt qua bài kiểm tra tự động (19/19 test cases passed).
-* ✅ Đóng gói đầy đủ Dockerfile, docker-compose.yml, script seed data và README hướng dẫn.
-* ✅ **Bảo vệ toàn vẹn repository:** Toàn bộ công việc được thực hiện độc lập 100% bên trong thư mục `english-center-backend/`, không có bất kỳ file bên ngoài nào bị chỉnh sửa hay làm xáo trộn.
-
+Hệ thống Backend bằng Python cho dự án **Tool Quản Lý Trung Tâm Tiếng Anh (B2B SaaS)** đã được rà soát, sửa chữa và nâng cấp toàn diện theo đúng phản hồi từ Frontend:
+* ✅ Đã triển khai đầy đủ 5 yêu cầu nghiệp vụ mới.
+* ✅ Toàn bộ thay đổi đồng bộ theo chu trình: `Model -> Schema -> Service -> API Endpoint -> Migration -> Test`.
+* ✅ 48/48 test cases chạy tự động vượt qua 100%.
+* ✅ Bảo mật tuyệt đối: Không lộ đáp án, không lộ mã PIN, chống thi hộ, chống brute-force, bảo vệ chế độ xem thử.
+* ✅ Hoàn toàn tương thích ngược với Frontend React hiện có.

@@ -1,5 +1,5 @@
 from datetime import date
-from typing import List
+from typing import List, Optional
 from sqlalchemy import Date, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.database import Base
@@ -28,6 +28,9 @@ class BaiKiemTra(Base, TimestampMixin):
     )
     ngay_kiem_tra: Mapped[date] = mapped_column(Date, nullable=False)
     thoi_gian_phut: Mapped[int] = mapped_column(Integer, default=15, nullable=False)
+    gio_mo_de: Mapped[Optional[str]] = mapped_column(String(10), nullable=True, default=None)
+    gio_dong_de: Mapped[Optional[str]] = mapped_column(String(10), nullable=True, default=None)
+    ma_vao_thi: Mapped[Optional[str]] = mapped_column(String(20), nullable=True, default=None)
 
     # Relationships
     session: Mapped["BuoiHoc"] = relationship("BuoiHoc", back_populates="exams")

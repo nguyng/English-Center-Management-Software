@@ -102,3 +102,31 @@ async def verify_center_license(
     ):
         raise LicenseExpiredException()
 
+async def get_optional_current_user(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security_scheme),
+    db: AsyncSession = Depends(get_db)
+) -> Optional[NguoiDung]:
+    """Extract and validate JWT Bearer token if present, otherwise return None."""
+    if not credentials or not credentials.credentials:
+        return None
+
+    token = credentials.credentials
+    try:
+        payload = decode_access_token(token)
+    except Exception:
+        return None
+
+    user_id = payload.get("id")
+    if not user_id:
+        return None
+
+    query = select(NguoiDung).where(NguoiDung.id == user_id)
+    result = await db.execute(query)
+    user = result.scalar_one_or_none()
+
+    if not user or user.trang_thai != UserStatus.ACTIVE.value:
+        return None
+
+    return user
+
+
