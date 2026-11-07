@@ -1,7 +1,28 @@
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { Card, Radio, Button, Typography, Space, Alert, Progress, Modal, Tag, Result, Input } from 'antd';
-import { ClockCircleOutlined, SafetyCertificateOutlined, LockOutlined, EyeOutlined, CheckCircleOutlined, WarningOutlined } from '@ant-design/icons';
+import {
+  Card,
+  Button,
+  Typography,
+  Space,
+  Alert,
+  Progress,
+  Modal,
+  Tag,
+  Result,
+  Input,
+  Avatar,
+} from 'antd';
+import {
+  ClockCircleOutlined,
+  SafetyCertificateOutlined,
+  LockOutlined,
+  CheckCircleOutlined,
+  WarningOutlined,
+  BookOutlined,
+  UserOutlined,
+  SendOutlined,
+} from '@ant-design/icons';
 import { roundScore } from '../../utils/validators';
 import dayjs from 'dayjs';
 
@@ -68,7 +89,7 @@ export default function ExamTakingPage() {
   const isPreview = searchParams.get('preview') === 'true';
 
   // Lấy cấu hình đề thi từ localStorage nếu GV vừa tạo, hoặc dùng default
-  const [examData, setExamData] = useState(() => {
+  const [examData] = useState(() => {
     try {
       const savedConfig = localStorage.getItem(`exam_config_${examId}`);
       if (savedConfig) return JSON.parse(savedConfig);
@@ -79,11 +100,16 @@ export default function ExamTakingPage() {
   const [selectedStudent, setSelectedStudent] = useState(
     isPreview ? { id: 9999, ho_ten: 'Giáo viên xem trước' } : null
   );
-  const [passcodeModal, setPasscodeModal] = useState({ open: false, student: null, inputCode: '', error: '' });
+  const [passcodeModal, setPasscodeModal] = useState({
+    open: false,
+    student: null,
+    inputCode: '',
+    error: '',
+  });
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [finalScore, setFinalScore] = useState(null);
-  const [tabWarnings, setTabWarnings] = useState(0);
+  const [, setTabWarnings] = useState(0);
 
   // Tính toán thời gian cố định
   const calculateRemainingSeconds = () => {
@@ -167,7 +193,8 @@ export default function ExamTakingPage() {
           if (count === 1) {
             Modal.warning({
               title: '⚠️ CẢNH BÁO RỜI TAB THI',
-              content: 'Hệ thống phát hiện bạn vừa rời khỏi màn hình làm bài! Nếu vi phạm thêm 1 lần nữa, bài thi sẽ bị TỰ ĐỘNG THU HỒI VÀ NỘP NGAY LẬP TỨC.',
+              content:
+                'Hệ thống phát hiện bạn vừa rời khỏi màn hình làm bài! Nếu vi phạm thêm 1 lần nữa, bài thi sẽ bị TỰ ĐỘNG THU HỒI VÀ NỘP NGAY LẬP TỨC.',
               okText: 'Tôi đã hiểu và quay lại làm bài',
             });
           } else if (count >= 2) {
@@ -241,7 +268,9 @@ export default function ExamTakingPage() {
     const m = Math.floor((secs % 3600) / 60);
     const s = secs % 60;
     if (h > 0) {
-      return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+      return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s
+        .toString()
+        .padStart(2, '0')}`;
     }
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
@@ -261,7 +290,10 @@ export default function ExamTakingPage() {
   const handleVerifyPasscode = () => {
     const requiredCode = examData.ma_vao_thi || '1234';
     if (passcodeModal.inputCode.trim() !== requiredCode.trim()) {
-      setPasscodeModal((prev) => ({ ...prev, error: 'Mã vào thi không chính xác! Vui lòng hỏi lại giáo viên.' }));
+      setPasscodeModal((prev) => ({
+        ...prev,
+        error: 'Mã vào thi không chính xác! Vui lòng hỏi lại giáo viên.',
+      }));
       return;
     }
 
@@ -269,23 +301,81 @@ export default function ExamTakingPage() {
     setPasscodeModal({ open: false, student: null, inputCode: '', error: '' });
   };
 
+  // Top Public Exam Brand Bar
+  const renderTopNavbar = () => (
+    <div
+      style={{
+        background: 'linear-gradient(90deg, #0f2557 0%, #1e3a8a 100%)',
+        padding: '14px 24px',
+        color: '#ffffff',
+        boxShadow: '0 2px 12px rgba(15, 23, 42, 0.1)',
+      }}
+    >
+      <div
+        style={{
+          maxWidth: 880,
+          margin: '0 auto',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 12,
+        }}
+      >
+        <Space size={10}>
+          <div
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 10,
+              background: 'linear-gradient(135deg, #38bdf8 0%, #f97316 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 18,
+            }}
+          >
+            <BookOutlined />
+          </div>
+          <div>
+            <div style={{ fontWeight: 800, fontSize: 16, lineHeight: 1.2 }}>
+              EduPrime <span style={{ color: '#38bdf8' }}>English</span>
+            </div>
+            <div style={{ fontSize: 11.5, color: '#bae6fd' }}>ONLINE TESTING PORTAL</div>
+          </div>
+        </Space>
+        <Tag
+          color="cyan"
+          style={{ margin: 0, borderRadius: 999, padding: '3px 12px', fontWeight: 600 }}
+        >
+          {examData.lop}
+        </Tag>
+      </div>
+    </div>
+  );
+
   // 1. Màn hình Cổng thi chưa mở
   if (isTooEarly()) {
     return (
-      <div style={{ maxWidth: 540, margin: '80px auto', padding: 24 }}>
-        <Card style={{ borderRadius: 16, textAlign: 'center' }}>
-          <ClockCircleOutlined style={{ fontSize: 52, color: '#faad14' }} />
-          <Title level={3} style={{ marginTop: 16 }}>Cổng thi chưa mở</Title>
-          <Paragraph>
-            Bài thi <strong>"{examData.ten_bai_kiem_tra}"</strong> sẽ mở vào lúc:
-          </Paragraph>
-          <Tag color="orange" style={{ fontSize: 18, padding: '6px 16px' }}>
-            {examData.gio_mo_de} ngày {examData.ngay_thi}
-          </Tag>
-          <Paragraph style={{ marginTop: 16, color: '#888' }}>
-            Vui lòng quay lại đúng giờ để được mở đề thi.
-          </Paragraph>
-        </Card>
+      <div style={{ minHeight: '100vh', background: 'var(--color-bg-canvas)' }}>
+        {renderTopNavbar()}
+        <div style={{ maxWidth: 540, margin: '64px auto', padding: '0 16px' }}>
+          <Card className="edtech-card" style={{ textAlign: 'center', padding: 16 }}>
+            <ClockCircleOutlined style={{ fontSize: 52, color: '#f59e0b' }} />
+            <Title level={3} style={{ marginTop: 16 }}>
+              Cổng thi chưa đến giờ mở
+            </Title>
+            <Paragraph>
+              Bài thi <strong>"{examData.ten_bai_kiem_tra}"</strong> sẽ chính thức mở vào lúc:
+            </Paragraph>
+            <Tag color="warning" style={{ fontSize: 17, padding: '6px 16px', borderRadius: 8 }}>
+              {examData.gio_mo_de} ngày {examData.ngay_thi}
+            </Tag>
+            <Paragraph style={{ marginTop: 16, color: '#64748b' }}>
+              Vui lòng quay lại đúng giờ quy định để bắt đầu làm bài.
+            </Paragraph>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -293,19 +383,25 @@ export default function ExamTakingPage() {
   // 2. Màn hình Cổng thi đã kết thúc
   if (isTooLate() && !submitted) {
     return (
-      <div style={{ maxWidth: 540, margin: '80px auto', padding: 24 }}>
-        <Card style={{ borderRadius: 16, textAlign: 'center' }}>
-          <WarningOutlined style={{ fontSize: 52, color: '#ff4d4f' }} />
-          <Title level={3} style={{ marginTop: 16 }}>Cổng thi đã đóng</Title>
-          <Paragraph>
-            Thời gian làm bài thi <strong>"{examData.ten_bai_kiem_tra}"</strong> đã kết thúc lúc <strong>{examData.gio_dong_de}</strong>.
-          </Paragraph>
-          <Alert
-            type="error"
-            message="Không thể nộp bài hoặc làm bài thi sau thời gian quy định."
-            style={{ textAlign: 'left', marginTop: 16 }}
-          />
-        </Card>
+      <div style={{ minHeight: '100vh', background: 'var(--color-bg-canvas)' }}>
+        {renderTopNavbar()}
+        <div style={{ maxWidth: 540, margin: '64px auto', padding: '0 16px' }}>
+          <Card className="edtech-card" style={{ textAlign: 'center', padding: 16 }}>
+            <WarningOutlined style={{ fontSize: 52, color: '#ef4444' }} />
+            <Title level={3} style={{ marginTop: 16 }}>
+              Cổng thi đã đóng
+            </Title>
+            <Paragraph>
+              Thời gian làm bài thi <strong>"{examData.ten_bai_kiem_tra}"</strong> đã kết thúc lúc{' '}
+              <strong>{examData.gio_dong_de}</strong>.
+            </Paragraph>
+            <Alert
+              type="error"
+              message="Không thể nộp bài hoặc làm bài thi sau thời gian quy định."
+              style={{ textAlign: 'left', marginTop: 16, borderRadius: 10 }}
+            />
+          </Card>
+        </div>
       </div>
     );
   }
@@ -313,106 +409,141 @@ export default function ExamTakingPage() {
   // 3. Màn hình chọn danh tính trước khi thi (có nhập mã bảo mật)
   if (!selectedStudent) {
     return (
-      <div style={{ maxWidth: 560, margin: '60px auto', padding: 24 }}>
-        <Card style={{ borderRadius: 16, boxShadow: '0 8px 24px rgba(0,0,0,0.08)' }}>
-          <div style={{ textAlign: 'center', marginBottom: 20 }}>
-            <SafetyCertificateOutlined style={{ fontSize: 48, color: '#1890ff' }} />
-            <Title level={3} style={{ marginTop: 12, marginBottom: 4 }}>
-              Cổng Thi Trắc Nghiệm Online
-            </Title>
-            <Text type="secondary">{examData.ten_bai_kiem_tra} — {examData.lop}</Text>
-          </div>
-
-          <Alert
-            type="info"
-            showIcon
-            message="Quy định giờ thi cố định & Mã bảo mật"
-            description={
-              <div>
-                • Khung giờ mở đề: <strong>{examData.gio_mo_de} đến {examData.gio_dong_de}</strong>
-                <br />
-                • Cần nhập <strong>Mã vào thi do giáo viên cấp</strong> để tránh trường hợp thi hộ.
+      <div style={{ minHeight: '100vh', background: 'var(--color-bg-canvas)' }}>
+        {renderTopNavbar()}
+        <div style={{ maxWidth: 580, margin: '48px auto', padding: '0 16px' }}>
+          <Card className="edtech-card" style={{ padding: '8px 4px' }}>
+            <div style={{ textAlign: 'center', marginBottom: 24 }}>
+              <div
+                style={{
+                  width: 64,
+                  height: 64,
+                  borderRadius: 18,
+                  background: '#eff6ff',
+                  color: '#1e3a8a',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 32,
+                  marginBottom: 12,
+                }}
+              >
+                <SafetyCertificateOutlined />
               </div>
-            }
-            style={{ marginBottom: 20 }}
-          />
-
-          <Paragraph>
-            Vui lòng chọn đúng tên học sinh của bạn trong danh sách:
-          </Paragraph>
-
-          <Space direction="vertical" style={{ width: '100%' }}>
-            {mockStudentsInClass.map((s) => {
-              const sub = getStudentSubmission(s.id);
-              return (
-                <Button
-                  key={s.id}
-                  size="large"
-                  block
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    height: 52,
-                    borderRadius: 8,
-                    borderColor: sub ? '#b7eb8f' : undefined,
-                    background: sub ? '#f6ffed' : undefined,
-                  }}
-                  onClick={() => {
-                    if (sub) {
-                      // Đã làm rồi -> vào xem lại kết quả
-                      setSelectedStudent(s);
-                    } else {
-                      // Chưa làm -> yêu cầu nhập mã bảo mật
-                      setPasscodeModal({ open: true, student: s, inputCode: '', error: '' });
-                    }
-                  }}
-                >
-                  <span>👤 <strong>{s.ho_ten}</strong></span>
-                  {sub ? (
-                    <Tag color="green">Đã nộp: {sub.score}/10đ (Bấm để xem lại)</Tag>
-                  ) : (
-                    <Tag color="blue"><LockOutlined /> Cần mã để làm bài</Tag>
-                  )}
-                </Button>
-              );
-            })}
-          </Space>
-        </Card>
-
-        {/* Modal Nhập Mã Vào Thi (Chống thi hộ) */}
-        <Modal
-          open={passcodeModal.open}
-          onCancel={() => setPasscodeModal({ open: false, student: null, inputCode: '', error: '' })}
-          onOk={handleVerifyPasscode}
-          title={`🔒 Xác thực tham gia bài thi: ${passcodeModal.student?.ho_ten}`}
-          okText="Xác nhận & Bắt đầu làm bài"
-          cancelText="Quay lại"
-          centered
-        >
-          <div style={{ padding: '12px 0' }}>
-            <Paragraph>
-              Vui lòng nhập <strong>Mã vào thi (PIN)</strong> do giáo viên cung cấp tại lớp:
-            </Paragraph>
-            <Input
-              prefix={<LockOutlined />}
-              placeholder="Nhập mã vào thi (Ví dụ: 1234)"
-              size="large"
-              value={passcodeModal.inputCode}
-              onChange={(e) => setPasscodeModal((prev) => ({ ...prev, inputCode: e.target.value, error: '' }))}
-              onPressEnter={handleVerifyPasscode}
-              autoFocus
-            />
-            {passcodeModal.error && (
-              <Text type="danger" style={{ display: 'block', marginTop: 8 }}>
-                ⚠️ {passcodeModal.error}
+              <Title level={3} style={{ margin: '0 0 4px', fontWeight: 800 }}>
+                {examData.ten_bai_kiem_tra}
+              </Title>
+              <Text type="secondary" style={{ fontSize: 14.5 }}>
+                Lớp: <strong>{examData.lop}</strong> • Số lượng: <strong>{examData.questions.length} câu hỏi</strong>
               </Text>
-            )}
-            <div style={{ marginTop: 12, fontSize: 12, color: '#888' }}>
-              💡 Mã này chỉ được cấp trong giờ học để đảm bảo bạn là người trực tiếp làm bài thi.
             </div>
-          </div>
-        </Modal>
+
+            <Alert
+              type="info"
+              showIcon
+              message="Quy chế phòng thi trực tuyến"
+              description={
+                <div style={{ fontSize: 13.5, marginTop: 4 }}>
+                  • Khung giờ mở đề: <strong>{examData.gio_mo_de} đến {examData.gio_dong_de}</strong>
+                  <br />• Nhập <strong>Mã bảo mật (PIN)</strong> do giáo viên cung cấp tại lớp để bắt đầu làm bài.
+                </div>
+              }
+              style={{ marginBottom: 24, borderRadius: 12 }}
+            />
+
+            <Text strong style={{ display: 'block', marginBottom: 12, color: '#334155' }}>
+              Chọn tên học viên của bạn trong danh sách lớp:
+            </Text>
+
+            <Space direction="vertical" size={10} style={{ width: '100%' }}>
+              {mockStudentsInClass.map((s) => {
+                const sub = getStudentSubmission(s.id);
+                return (
+                  <div
+                    key={s.id}
+                    onClick={() => {
+                      if (sub) {
+                        setSelectedStudent(s);
+                      } else {
+                        setPasscodeModal({ open: true, student: s, inputCode: '', error: '' });
+                      }
+                    }}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '14px 18px',
+                      borderRadius: 12,
+                      cursor: 'pointer',
+                      border: sub ? '1.5px solid #10b981' : '1px solid #e2e8f0',
+                      background: sub ? '#ecfdf5' : '#ffffff',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    <Space size={12}>
+                      <Avatar
+                        size={36}
+                        icon={<UserOutlined />}
+                        style={{
+                          background: sub
+                            ? '#10b981'
+                            : 'linear-gradient(135deg, #1e3a8a 0%, #0284c7 100%)',
+                        }}
+                      />
+                      <Text strong style={{ fontSize: 15, color: '#0f172a' }}>
+                        {s.ho_ten}
+                      </Text>
+                    </Space>
+                    {sub ? (
+                      <Tag color="success" icon={<CheckCircleOutlined />}>
+                        Đã nộp: {sub.score}/10đ (Xem lại)
+                      </Tag>
+                    ) : (
+                      <Tag color="geekblue" icon={<LockOutlined />}>
+                        Nhập PIN vào thi
+                      </Tag>
+                    )}
+                  </div>
+                );
+              })}
+            </Space>
+          </Card>
+
+          {/* Modal Nhập Mã Vào Thi (Chống thi hộ) */}
+          <Modal
+            open={passcodeModal.open}
+            onCancel={() =>
+              setPasscodeModal({ open: false, student: null, inputCode: '', error: '' })
+            }
+            onOk={handleVerifyPasscode}
+            title={`🔒 Xác thực thí sinh: ${passcodeModal.student?.ho_ten}`}
+            okText="Xác nhận & Mở đề thi"
+            cancelText="Quay lại"
+            centered
+          >
+            <div style={{ padding: '12px 0' }}>
+              <Paragraph>
+                Vui lòng nhập <strong>Mã vào thi (PIN)</strong> do giáo viên đọc trên lớp:
+              </Paragraph>
+              <Input
+                prefix={<LockOutlined style={{ color: '#0284c7' }} />}
+                placeholder="Nhập mã vào thi (Ví dụ: 1234)"
+                size="large"
+                value={passcodeModal.inputCode}
+                onChange={(e) =>
+                  setPasscodeModal((prev) => ({ ...prev, inputCode: e.target.value, error: '' }))
+                }
+                onPressEnter={handleVerifyPasscode}
+                autoFocus
+              />
+              {passcodeModal.error && (
+                <Text type="danger" style={{ display: 'block', marginTop: 8 }}>
+                  ⚠️ {passcodeModal.error}
+                </Text>
+              )}
+            </div>
+          </Modal>
+        </div>
       </div>
     );
   }
@@ -420,47 +551,70 @@ export default function ExamTakingPage() {
   // 4. Màn hình kết quả sau khi nộp
   if (submitted) {
     return (
-      <div style={{ maxWidth: 640, margin: '60px auto', padding: 24 }}>
-        {isPreview && (
-          <Alert
-            type="warning"
-            showIcon
-            message="👁️ ĐÂY LÀ CHẾ ĐỘ XEM TRƯỚC CỦA GIÁO VIÊN"
-            description="Bài nộp thử này chỉ để kiểm tra đề thi, hoàn toàn KHÔNG lưu vào kết quả của bất kỳ học sinh nào trong lớp."
-            style={{ marginBottom: 16 }}
-          />
-        )}
-        <Card style={{ borderRadius: 16, textAlign: 'center' }}>
-          <Result
-            status="success"
-            title={isPreview ? 'Hoàn thành làm thử bài thi!' : `Chúc mừng ${selectedStudent.ho_ten} đã hoàn thành bài thi!`}
-            subTitle={`Kết quả: ${finalScore} / 10 điểm`}
-            extra={[
-              <Alert
-                key="notice"
-                type="info"
-                showIcon
-                message={
-                  isPreview
-                    ? 'Bạn đang ở chế độ xem thử. Kết quả của học sinh thật sẽ được ghi vào trang "Bảng Điểm Bài Thi".'
-                    : 'Kết quả đã được ghi nhận vào hệ thống. Cuối ca học, phụ huynh sẽ nhận được thông báo điểm số qua Zalo.'
-                }
-                style={{ textAlign: 'left', marginTop: 16, marginBottom: 20 }}
-              />,
-              <Space key="actions" wrap style={{ justifyContent: 'center' }}>
-                {isPreview ? (
-                  <Button type="primary" onClick={() => window.close()}>
-                    Đóng cửa sổ xem thử
-                  </Button>
-                ) : (
-                  <Button onClick={() => setSelectedStudent(null)}>
-                    Quay lại danh sách lớp
-                  </Button>
-                )}
-              </Space>,
-            ]}
-          />
-        </Card>
+      <div style={{ minHeight: '100vh', background: 'var(--color-bg-canvas)' }}>
+        {renderTopNavbar()}
+        <div style={{ maxWidth: 640, margin: '48px auto', padding: '0 16px' }}>
+          {isPreview && (
+            <Alert
+              type="warning"
+              showIcon
+              message="👁️ CHẾ ĐỘ XEM TRƯỚC CỦA GIÁO VIÊN"
+              description="Bài nộp thử này chỉ để kiểm tra đề thi, hoàn toàn KHÔNG lưu vào kết quả của học sinh trong lớp."
+              style={{ marginBottom: 16, borderRadius: 12 }}
+            />
+          )}
+          <Card className="edtech-card" style={{ textAlign: 'center' }}>
+            <Result
+              status="success"
+              title={
+                isPreview
+                  ? 'Hoàn thành làm thử bài thi!'
+                  : `Chúc mừng ${selectedStudent.ho_ten} đã hoàn thành bài thi!`
+              }
+              subTitle={
+                <div style={{ marginTop: 8 }}>
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      padding: '8px 24px',
+                      borderRadius: 999,
+                      background: '#eff6ff',
+                      color: '#1e3a8a',
+                      fontSize: 22,
+                      fontWeight: 800,
+                    }}
+                  >
+                    Điểm số: {finalScore} / 10
+                  </span>
+                </div>
+              }
+              extra={[
+                <Alert
+                  key="notice"
+                  type="info"
+                  showIcon
+                  message={
+                    isPreview
+                      ? 'Bạn đang ở chế độ xem thử. Kết quả của học sinh thật sẽ được ghi nhận vào trang "Bảng Điểm Bài Thi".'
+                      : 'Kết quả đã được ghi nhận vào hệ thống. Cuối ca học, phụ huynh sẽ nhận được thông báo điểm số qua Zalo ZNS.'
+                  }
+                  style={{ textAlign: 'left', marginTop: 16, marginBottom: 20, borderRadius: 10 }}
+                />,
+                <Space key="actions" wrap style={{ justifyContent: 'center' }}>
+                  {isPreview ? (
+                    <Button type="primary" size="large" onClick={() => window.close()}>
+                      Đóng cửa sổ xem thử
+                    </Button>
+                  ) : (
+                    <Button size="large" onClick={() => setSelectedStudent(null)}>
+                      Quay lại danh sách lớp
+                    </Button>
+                  )}
+                </Space>,
+              ]}
+            />
+          </Card>
+        </div>
       </div>
     );
   }
@@ -470,99 +624,175 @@ export default function ExamTakingPage() {
   const progressPercent = Math.round((answeredCount / examData.questions.length) * 100);
 
   return (
-    <div style={{ maxWidth: 760, margin: '20px auto', padding: '0 16px' }}>
-      {/* Banner nếu là Giáo viên xem thử */}
-      {isPreview && (
-        <Alert
-          type="warning"
-          showIcon
-          banner
-          message="👁️ BẠN ĐANG Ở CHẾ ĐỘ XEM THỬ ĐỀ THI (GIÁO VIÊN) — Mọi câu trả lời của bạn không ảnh hưởng tới dữ liệu của học sinh."
-          style={{ marginBottom: 16, borderRadius: 8 }}
-        />
-      )}
+    <div style={{ minHeight: '100vh', background: 'var(--color-bg-canvas)', paddingBottom: 60 }}>
+      {renderTopNavbar()}
 
-      {/* Thanh Header nổi cố định */}
-      <Card
-        size="small"
-        style={{
-          position: 'sticky',
-          top: 10,
-          zIndex: 100,
-          borderRadius: 12,
-          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-          marginBottom: 20,
-        }}
-      >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <Text strong style={{ fontSize: 16 }}>👤 {selectedStudent.ho_ten}</Text>
-            <br />
-            <Text type="secondary" style={{ fontSize: 13 }}>
-              Đã làm: {answeredCount}/{examData.questions.length} câu | Đóng cổng: <strong>{examData.gio_dong_de}</strong>
-            </Text>
-          </div>
-          <div style={{ textAlign: 'right' }}>
+      <div style={{ maxWidth: 820, margin: '20px auto', padding: '0 16px' }}>
+        {/* Banner nếu là Giáo viên xem thử */}
+        {isPreview && (
+          <Alert
+            type="warning"
+            showIcon
+            banner
+            message="👁️ CHẾ ĐỘ XEM THỬ ĐỀ THI (GIÁO VIÊN) — Mọi câu trả lời không ảnh hưởng tới dữ liệu học sinh."
+            style={{ marginBottom: 16, borderRadius: 10 }}
+          />
+        )}
+
+        {/* Thanh Header nổi cố định */}
+        <Card
+          size="small"
+          style={{
+            position: 'sticky',
+            top: 12,
+            zIndex: 100,
+            borderRadius: 14,
+            boxShadow: '0 8px 24px rgba(15, 23, 42, 0.1)',
+            border: '1px solid #cbd5e1',
+            marginBottom: 24,
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+            <Space size={12}>
+              <Avatar
+                size={40}
+                icon={<UserOutlined />}
+                style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #0284c7 100%)' }}
+              />
+              <div>
+                <Text strong style={{ fontSize: 15.5, color: '#0f172a', display: 'block' }}>
+                  {selectedStudent.ho_ten}
+                </Text>
+                <Text type="secondary" style={{ fontSize: 12.5 }}>
+                  Tiến độ: <strong>{answeredCount}/{examData.questions.length}</strong> câu • Đóng cổng: <strong>{examData.gio_dong_de}</strong>
+                </Text>
+              </div>
+            </Space>
             <Tag
               icon={<ClockCircleOutlined />}
               color={timeLeft < 180 ? 'error' : 'processing'}
-              style={{ fontSize: 16, padding: '4px 12px' }}
+              style={{ fontSize: 16, padding: '6px 14px', borderRadius: 999, fontWeight: 700, margin: 0 }}
             >
               {formatTimer(timeLeft)}
             </Tag>
           </div>
+          <Progress
+            percent={progressPercent}
+            size="small"
+            showInfo={false}
+            strokeColor="#0284c7"
+            style={{ marginTop: 10, marginBottom: 0 }}
+          />
+        </Card>
+
+        {/* Danh sách câu hỏi */}
+        <Space direction="vertical" size={20} style={{ width: '100%', marginBottom: 32 }}>
+          {examData.questions.map((q, idx) => {
+            const selectedOpt = answers[q.id];
+            return (
+              <Card
+                key={q.id}
+                className="edtech-card"
+                style={{
+                  borderColor: selectedOpt ? '#38bdf8' : '#e2e8f0',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 16 }}>
+                  <Tag
+                    color={selectedOpt ? 'geekblue' : 'default'}
+                    style={{
+                      fontWeight: 700,
+                      fontSize: 13,
+                      padding: '3px 10px',
+                      borderRadius: 6,
+                      marginTop: 2,
+                    }}
+                  >
+                    Câu {idx + 1}
+                  </Tag>
+                  <Title level={5} style={{ margin: 0, lineHeight: 1.5, color: '#0f172a' }}>
+                    {q.noi_dung}
+                  </Title>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 10 }}>
+                  {['A', 'B', 'C', 'D'].map((optKey) => {
+                    const optText = q[`dap_an_${optKey.toLowerCase()}`];
+                    if (!optText) return null;
+                    const isChecked = selectedOpt === optKey;
+
+                    return (
+                      <div
+                        key={optKey}
+                        onClick={() => handleSelectAnswer(q.id, optKey)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 12,
+                          padding: '12px 16px',
+                          borderRadius: 10,
+                          cursor: 'pointer',
+                          border: isChecked ? '2px solid #0284c7' : '1px solid #e2e8f0',
+                          background: isChecked ? '#f0f9ff' : '#f8fafc',
+                          transition: 'all 0.15s',
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: 30,
+                            height: 30,
+                            borderRadius: '50%',
+                            background: isChecked ? '#0284c7' : '#ffffff',
+                            color: isChecked ? '#ffffff' : '#475569',
+                            border: isChecked ? 'none' : '1px solid #cbd5e1',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontWeight: 700,
+                            fontSize: 13.5,
+                            flexShrink: 0,
+                          }}
+                        >
+                          {optKey}
+                        </div>
+                        <span
+                          style={{
+                            fontSize: 14.5,
+                            fontWeight: isChecked ? 600 : 400,
+                            color: isChecked ? '#0c4a6e' : '#1e293b',
+                          }}
+                        >
+                          {optText}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </Card>
+            );
+          })}
+        </Space>
+
+        <div style={{ textAlign: 'center' }}>
+          <Button
+            type="primary"
+            size="large"
+            className="btn-cta-orange"
+            icon={<SendOutlined />}
+            style={{ minWidth: 280, height: 50, fontSize: 16, borderRadius: 12 }}
+            onClick={() => {
+              Modal.confirm({
+                title: 'Xác nhận nộp bài thi?',
+                content: `Bạn đã trả lời ${answeredCount}/${examData.questions.length} câu hỏi. Bạn có chắc chắn muốn nộp bài?`,
+                okText: 'Nộp bài ngay',
+                cancelText: 'Làm tiếp',
+                onOk: () => handleSubmit('Học sinh chủ động bấm nộp bài'),
+              });
+            }}
+          >
+            {isPreview ? 'Nộp bài xem thử (Không lưu)' : 'Hoàn thành & Nộp bài thi'}
+          </Button>
         </div>
-        <Progress percent={progressPercent} size="small" showInfo={false} style={{ marginTop: 8 }} />
-      </Card>
-
-      {/* Danh sách câu hỏi */}
-      <Space direction="vertical" size="large" style={{ width: '100%', marginBottom: 32 }}>
-        {examData.questions.map((q, idx) => (
-          <Card key={q.id} style={{ borderRadius: 12, border: answers[q.id] ? '1px solid #91caff' : undefined }}>
-            <Title level={5}>
-              Câu {idx + 1}: {q.noi_dung}
-            </Title>
-            <Radio.Group
-              value={answers[q.id]}
-              onChange={(e) => handleSelectAnswer(q.id, e.target.value)}
-              style={{ width: '100%', marginTop: 8 }}
-            >
-              <Space direction="vertical" style={{ orientation: 'vertical', width: '100%' }}>
-                <Radio value="A" style={{ width: '100%', padding: '8px 12px', background: '#fafafa', borderRadius: 8 }}>
-                  <strong>A.</strong> {q.dap_an_a}
-                </Radio>
-                <Radio value="B" style={{ width: '100%', padding: '8px 12px', background: '#fafafa', borderRadius: 8 }}>
-                  <strong>B.</strong> {q.dap_an_b}
-                </Radio>
-                <Radio value="C" style={{ width: '100%', padding: '8px 12px', background: '#fafafa', borderRadius: 8 }}>
-                  <strong>C.</strong> {q.dap_an_c}
-                </Radio>
-                <Radio value="D" style={{ width: '100%', padding: '8px 12px', background: '#fafafa', borderRadius: 8 }}>
-                  <strong>D.</strong> {q.dap_an_d}
-                </Radio>
-              </Space>
-            </Radio.Group>
-          </Card>
-        ))}
-      </Space>
-
-      <div style={{ textAlign: 'center', marginBottom: 60 }}>
-        <Button
-          type="primary"
-          size="large"
-          style={{ minWidth: 260, height: 48, fontSize: 16, borderRadius: 8 }}
-          onClick={() => {
-            Modal.confirm({
-              title: 'Xác nhận nộp bài thi?',
-              content: `Bạn đã trả lời ${answeredCount}/${examData.questions.length} câu hỏi. Bạn có chắc chắn muốn nộp bài?`,
-              okText: 'Nộp bài ngay',
-              cancelText: 'Làm tiếp',
-              onOk: () => handleSubmit('Học sinh chủ động bấm nộp bài'),
-            });
-          }}
-        >
-          {isPreview ? 'Nộp bài xem thử (Không lưu)' : 'Hoàn thành & Nộp bài thi'}
-        </Button>
       </div>
     </div>
   );

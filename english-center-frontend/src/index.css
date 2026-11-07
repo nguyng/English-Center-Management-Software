@@ -1,22 +1,394 @@
-* {
+:root {
+  /* === BRAND COLORS: Modern English Learning Center – Premium EdTech === */
+  --color-primary: #1e3a8a;          /* Deep Navy Blue */
+  --color-primary-dark: #0f2557;     /* Midnight Navy */
+  --color-primary-light: #2563eb;    /* Royal Blue */
+  --color-primary-soft: #eff6ff;     /* Soft Blue Tint */
+
+  --color-secondary: #0284c7;        /* Sky Blue */
+  --color-secondary-light: #38bdf8;  /* Bright Sky Blue */
+  --color-secondary-soft: #f0f9ff;   /* Ice Sky Tint */
+
+  --color-accent: #f97316;           /* Energetic EdTech Orange (CTA) */
+  --color-accent-hover: #ea580c;     /* Deep Orange */
+  --color-accent-soft: #fff7ed;      /* Warm Peach Tint */
+  --color-amber: #f59e0b;            /* Golden Yellow Accent */
+
+  /* === NEUTRAL & SURFACE COLORS === */
+  --color-bg-canvas: #f8fafc;        /* Light Slate Gray Background */
+  --color-bg-surface: #ffffff;       /* Pure White Card Surface */
+  --color-bg-subtle: #f1f5f9;        /* Secondary Surface */
+  --color-text-primary: #0f172a;     /* Dark Slate */
+  --color-text-secondary: #475569;   /* Muted Slate */
+  --color-text-muted: #94a3b8;       /* Subtle Slate */
+  --color-border: #e2e8f0;           /* Crisp Border */
+  --color-border-hover: #cbd5e1;
+
+  /* === SEMANTIC STATUS COLORS === */
+  --color-success: #10b981;
+  --color-success-soft: #ecfdf5;
+  --color-warning: #f59e0b;
+  --color-warning-soft: #fffbeb;
+  --color-danger: #ef4444;
+  --color-danger-soft: #fef2f2;
+
+  /* === TYPOGRAPHY === */
+  --font-sans: 'Be Vietnam Pro', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Plus Jakarta Sans', 'Be Vietnam Pro', sans-serif;
+
+  /* === SPACING & RADIUS === */
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* === SHADOWS === */
+  --shadow-xs: 0 1px 2px 0 rgba(15, 23, 42, 0.04);
+  --shadow-sm: 0 1px 3px 0 rgba(15, 23, 42, 0.06), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 12px -2px rgba(15, 23, 42, 0.08), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 12px 28px -4px rgba(15, 23, 42, 0.12), 0 4px 10px -2px rgba(15, 23, 42, 0.05);
+  --shadow-accent: 0 8px 20px -4px rgba(249, 115, 22, 0.35);
+  --shadow-primary: 0 8px 20px -4px rgba(30, 58, 138, 0.28);
+
+  /* === TRANSITIONS === */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 220ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
 body {
   margin: 0;
   padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
-    'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
-    'Noto Color Emoji';
-  background-color: #f0f2f5;
-  color: #000000d9;
+  font-family: var(--font-sans);
+  background-color: var(--color-bg-canvas);
+  color: var(--color-text-primary);
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
 #root {
   min-height: 100vh;
   width: 100%;
+}
+
+/* === TYPOGRAPHY REFINEMENTS === */
+h1, h2, h3, h4, h5, h6,
+.ant-typography h1,
+.ant-typography h2,
+.ant-typography h3,
+.ant-typography h4,
+.ant-typography h5 {
+  font-family: var(--font-display);
+  color: var(--color-text-primary);
+  letter-spacing: -0.015em;
+}
+
+/* === PAGE HEADER & HERO SYSTEM === */
+.edtech-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 20px 24px;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+}
+
+.edtech-hero-banner {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(125deg, #0f2557 0%, #1e3a8a 55%, #0284c7 100%);
+  color: #ffffff;
+  padding: 28px 32px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-md);
+}
+
+.edtech-hero-banner::before {
+  content: '';
+  position: absolute;
+  top: -60px;
+  right: -40px;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.25) 0%, rgba(56, 189, 248, 0) 70%);
+  pointer-events: none;
+}
+
+.edtech-hero-banner::after {
+  content: '';
+  position: absolute;
+  bottom: -80px;
+  left: 35%;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(249, 115, 22, 0.18) 0%, rgba(249, 115, 22, 0) 70%);
+  pointer-events: none;
+}
+
+/* === KPI & STAT CARDS === */
+.edtech-stat-card {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-xs);
+  transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.edtech-stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: #cbd5e1;
+}
+
+.edtech-stat-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+/* === CONTENT CARDS & TOOLBARS === */
+.edtech-card {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-xs);
+  transition: box-shadow var(--transition-base), transform var(--transition-base);
+}
+
+.edtech-card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: #93c5fd !important;
+}
+
+.edtech-filter-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 16px 20px;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-bottom: none;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.edtech-table-wrapper {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+  overflow: hidden;
+}
+
+/* === CTA BUTTONS === */
+.btn-cta-orange {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  box-shadow: var(--shadow-accent) !important;
+  transition: all var(--transition-base) !important;
+}
+
+.btn-cta-orange:hover:not(:disabled) {
+  background: linear-gradient(135deg, #fb923c 0%, #f97316 100%) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px -4px rgba(249, 115, 22, 0.45) !important;
+}
+
+/* === ANT DESIGN GLOBAL ENHANCEMENTS === */
+.ant-card {
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+  border-color: var(--color-border);
+}
+
+.ant-card-head {
+  border-bottom-color: #f1f5f9 !important;
+  padding: 0 24px !important;
+  min-height: 56px !important;
+  font-weight: 600 !important;
+}
+
+.ant-table-wrapper .ant-table {
+  font-family: var(--font-sans);
+}
+
+.ant-table-wrapper .ant-table-thead > tr > th {
+  background: #f8fafc !important;
+  color: #334155 !important;
+  font-weight: 600 !important;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  border-bottom: 1px solid var(--color-border) !important;
+  padding: 14px 16px !important;
+}
+
+.ant-table-wrapper .ant-table-tbody > tr > td {
+  padding: 14px 16px !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  color: var(--color-text-primary);
+}
+
+.ant-table-wrapper .ant-table-tbody > tr:hover > td {
+  background: #f8fafc !important;
+}
+
+.ant-btn {
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.ant-btn-primary:not(.ant-btn-dangerous) {
+  box-shadow: 0 2px 6px rgba(30, 58, 138, 0.2);
+}
+
+.ant-btn-primary:not(.ant-btn-dangerous):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.28);
+}
+
+.ant-tag {
+  border-radius: 6px;
+  font-weight: 500;
+  padding: 2px 10px;
+}
+
+.ant-modal .ant-modal-content {
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-lg);
+}
+
+.ant-modal .ant-modal-header {
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.ant-input,
+.ant-input-affix-wrapper,
+.ant-select-selector,
+.ant-picker {
+  border-radius: var(--radius-sm) !important;
+}
+
+/* Custom Sider Dark Navy Theme Overrides */
+.edtech-sider.ant-layout-sider {
+  background: linear-gradient(180deg, #0f2557 0%, #172554 60%, #0f172a 100%) !important;
+  box-shadow: 4px 0 24px rgba(15, 23, 42, 0.08);
+}
+
+.edtech-sider .ant-layout-sider-trigger {
+  background: rgba(15, 23, 42, 0.65) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: #94a3b8 !important;
+}
+
+.edtech-sider .ant-menu-dark {
+  background: transparent !important;
+  padding: 8px 10px;
+}
+
+.edtech-sider .ant-menu-dark .ant-menu-item {
+  border-radius: 10px;
+  margin-bottom: 6px;
+  height: 44px;
+  line-height: 44px;
+  color: #cbd5e1;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+}
+
+.edtech-sider .ant-menu-dark .ant-menu-item:hover {
+  background: rgba(56, 189, 248, 0.12) !important;
+  color: #ffffff !important;
+}
+
+.edtech-sider .ant-menu-dark .ant-menu-item-selected {
+  background: linear-gradient(90deg, #0284c7 0%, #2563eb 100%) !important;
+  color: #ffffff !important;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);
+}
+
+.edtech-sider .ant-menu-dark .ant-menu-item-divider {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  margin: 12px 8px !important;
+}
+
+/* Subtle animations */
+@keyframes fadeInSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fadeInSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .edtech-page-header {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .edtech-hero-banner {
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .edtech-stat-card {
+    padding: 16px;
+  }
+
+  .ant-card-body {
+    padding: 16px !important;
+  }
 }
