@@ -1,9 +1,12 @@
 import asyncio
 from datetime import datetime, timezone
-from typing import Any, Dict
+import logging
+from typing import Any, Dict, Optional
+import httpx
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.constants import ZaloMessageStatus, ZaloMessageType
 from app.models.center import TrungTam
 from app.models.session import BuoiHoc
@@ -11,7 +14,49 @@ from app.models.student import HocSinh
 from app.models.zalo_log import NhatKyZalo
 from app.services.zalo.base import BaseZaloProvider
 
+logger = logging.getLogger(__name__)
+
 class MockZaloProvider(BaseZaloProvider):
+    async def _dispatch_realtime_bot(self, title: str, recipient: str, content: str) -> None:
+        """Helper dispatched in demo mode to send live notification to Telegram or Discord if configured."""
+        # 1. Telegram Bot (gửi trực tiếp đến Telegram Thầy/Admin)
+        if settings.TELEGRAM_BOT_TOKEN and settings.TELEGRAM_CHAT_ID:
+            try:
+                tg_msg = (
+                    f"🔔 *[MÔ PHỎNG ZALO ZNS - DEMO]*\n"
+                    f"📌 *{title}*\n"
+                    f"👤 *SĐT Phụ huynh:* `{recipient}`\n\n"
+                    f"💬 *Nội dung:*\n{content}"
+                )
+                tg_url = f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/sendMessage"
+                async with httpx.AsyncClient(timeout=4.0) as client:
+                    await client.post(tg_url, json={
+                        "chat_id": settings.TELEGRAM_CHAT_ID,
+                        "text": tg_msg,
+                        "parse_mode": "Markdown"
+                    })
+            except Exception as e:
+                logger.warning(f"Failed to forward mock Zalo notice to Telegram: {e}")
+
+        # 2. Discord Webhook (dành cho kênh Discord của nhóm/thầy)
+        if settings.DISCORD_WEBHOOK_URL:
+            try:
+                discord_payload = {
+                    "content": "🔔 **[MÔ PHỎNG ZALO ZNS - DEMO]**",
+                    "embeds": [{
+                        "title": title,
+                        "description": content,
+                        "color": 3447003,
+                        "fields": [
+                            {"name": "SĐT Phụ huynh", "value": recipient, "inline": True}
+                        ],
+                        "footer": {"text": "English Center Management - Zalo Mock Service"}
+                    }]
+                }
+                async with httpx.AsyncClient(timeout=4.0) as client:
+                    await client.post(settings.DISCORD_WEBHOOK_URL, json=discord_payload)
+            except Exception as e:
+                logger.warning(f"Failed to forward mock Zalo notice to Discord: {e}")
     async def send_absent_notice(
         self,
         db: AsyncSession,
@@ -50,6 +95,13 @@ class MockZaloProvider(BaseZaloProvider):
         )
         db.add(log)
         await db.flush()
+
+        # Bắn thông báo realtime tới Telegram/Discord của Thầy/Admin nếu đã cấu hình
+        await self._dispatch_realtime_bot(
+            title=f"THÔNG BÁO VẮNG HỌC - {session.ca_hoc}",
+            recipient=student.sdt_phu_huynh,
+            content=content
+        )
 
         return {"status": "success", "mode": "demo", "log_id": log.id}
 
@@ -97,6 +149,13 @@ class MockZaloProvider(BaseZaloProvider):
         )
         db.add(log)
         await db.flush()
+
+        # Bắn thông báo realtime tới Telegram/Discord của Thầy/Admin nếu đã cấu hình
+        await self._dispatch_realtime_bot(
+            title=f"THÔNG BÁO ĐIỂM SỐ - {exam_name}",
+            recipient=student.sdt_phu_huynh,
+            content=content
+        )
 
         return {"status": "success", "mode": "demo", "log_id": log.id}
 

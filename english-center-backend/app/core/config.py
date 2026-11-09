@@ -50,6 +50,11 @@ class Settings(BaseSettings):
     DEFAULT_TEACHER_EMAIL: str = "teacher@center.edu.vn"
     DEFAULT_TEACHER_PASSWORD: str = "Password123@"
 
+    # Realtime Test Notifications (Telegram / Discord) for Mock Zalo Demo
+    TELEGRAM_BOT_TOKEN: Union[str, None] = None
+    TELEGRAM_CHAT_ID: Union[str, None] = None
+    DISCORD_WEBHOOK_URL: Union[str, None] = None
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
